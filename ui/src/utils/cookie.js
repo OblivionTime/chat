@@ -1,0 +1,38 @@
+/*
+ * @Description: 
+ * @Version: 1.0
+ * @Autor: solid
+ * @Date: 2022-05-17 12:45:40
+ * @LastEditors: solid
+ * @LastEditTime: 2022-05-31 18:52:46
+ */
+import Cookies from 'js-cookie'
+
+const TokenKey = 'Authorization'
+const NameKey = 'user'
+
+export function getToken() {
+  return localStorage.getItem(TokenKey)
+}
+
+export function setToken(token) {
+  return localStorage.setItem(TokenKey, token)
+}
+
+export function removeToken() {
+  return localStorage.removeItem(TokenKey)
+}
+export function getUser() {
+  if (localStorage.getItem(NameKey)) {
+    return JSON.parse(localStorage.getItem(NameKey))
+  }
+  return ""
+}
+
+export function setUser(user) {
+  return localStorage.setItem(NameKey, JSON.stringify(user))
+}
+
+export function removeUser() {
+  return localStorage.removeItem(NameKey)
+}
