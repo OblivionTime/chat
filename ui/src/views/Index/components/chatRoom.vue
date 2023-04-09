@@ -1,5 +1,6 @@
 <template>
-    <div class="chat-container" @click="showEmoji = false" v-loading.fullscreen.lock="fullscreenLoading">
+    <div class="chat-container" @click="showEmoji = false" v-loading.fullscreen.lock="fullscreenLoading"
+        :style="containerAni">
         <div class="header">
             <div class="header-top">
                 <div class="header-left">
@@ -107,7 +108,6 @@ const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
 import { EmojiList } from '@/utils/emoji';
 import { getFileSuffix2, getFileSuffix, getFileIcons, getFileName } from '@/utils/file'
-// import { getIpAddress } from '@/utils/ipaddr';
 
 export default {
 
@@ -119,6 +119,7 @@ export default {
     data() {
         return {
             empty: true,
+            containerAni: "opacity:1",
             sender_id: 1,
             receiver_id: 2,
             username: "",
@@ -146,20 +147,29 @@ export default {
     },
     created() {
         this.sendType = localStorage.getItem('sendType') ? localStorage.getItem('sendType') : 'enter'
+
     },
     watch: {
-        options(newValue, oldValue) {
+        options(newOptions, oldOptions) {
+            if (newOptions.room == oldOptions.room) {
+                return
+            }
             if (this.options) {
+                this.containerAni = 'opacity:0'
+                this.empty = false
                 this.sender_id = this.$store.getters.userInfo.id
                 this.username = this.$store.getters.userInfo.username
                 this.avatar = this.$store.getters.userInfo.avatar
                 this.room = this.options.room
                 this.receiver_id = this.options.user_id
                 this.name = this.options.name
-                this.empty = false
                 this.initSocket()
                 this.initRTCSocket()
                 this.chatList = []
+                setTimeout(() => {
+                    this.containerAni = 'opacity:1'
+                    this.empty = false
+                }, 100);
             }
         },
         deep: true
@@ -192,8 +202,6 @@ export default {
                 this.socket.close()
                 this.socket = null
             }
-            // let prefix = window.location.host
-            // let prefix = getIpAddress() + ":8888"
             this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/message/single?room=${this.room}&id=${this.sender_id}`)
             this.socket.onopen = () => {
                 console.log('连接成功');
@@ -391,6 +399,8 @@ export default {
     height: 100vh;
     overflow: hidden;
     background-color: #eee;
+    transition: opacity 1s linear;
+    opacity: 0;
 
     .header {
         width: 100%;

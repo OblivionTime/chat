@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "serve": "node index.js",
-    "build": "nexe index.js -t windows-x64-14.15.3 -o ./dist/release/chat.exe  -r ui/  --icon logo.ico --rc logo.rc ",
-    "build:win": "nexe index.js -t windows-x64-14.15.3 -o ./dist/release/chat.exe  -r ui/ --icon logo.ico --rc logo.rc",
-    "build:mac": "nexe index.js -t mac-x64-14.15.3 -o ./dist/release/chat.exe   -r ui/",
-    "build:linux": "nexe  index.js -t linux-x64-14.15.3 -o ./dist/release/chat -r ui/ "
+    "build": "yarn build:win && yarn build:mac && yarn build:linux",
+    "build:win": "nexe index.js -t windows-x64-14.15.3 -o ./dist/release/chat.exe ",
+    "build:mac": "nexe index.js -t mac-x64-14.15.3 -o ./dist/release/chat.exe ",
+    "build:linux": "nexe  index.js -t linux-x64-14.15.3 -o ./dist/release/chat "
   },
   "author": "",
   "license": "ISC",

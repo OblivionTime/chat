@@ -89,6 +89,9 @@ async function SingleRTCConnect(ws, req) {
                 break;
         }
     })
+    ws.on('close', () => {
+        rooms[room][username] = ""
+    })
 
 }
 //发送给其他人
@@ -97,7 +100,9 @@ function BroadcastSocket(username, room, data) {
         if (key == username || key == username + '_listen') {
             continue
         }
-        let ws = rooms[room][key]
-        ws.send(JSON.stringify(data))
+        if (rooms[room][key]) {
+            let ws = rooms[room][key]
+            ws.send(JSON.stringify(data))
+        }
     }
 }

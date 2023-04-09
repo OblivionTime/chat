@@ -1,11 +1,26 @@
-// 1. 导入 mysql 模块
+// 1. 导入 mysql和fs 模块
 const mysql = require('mysql')
+const fs = require('fs')
+let host = '127.0.0.1'
+let port = 3306
+let user = 'root'
+let password = '123456'
+let database = 'chat'
+if (fs.existsSync("config.json")) {
+    var res = JSON.parse(fs.readFileSync(`config.json`))
+    host = res.host
+    port = res.port
+    user = res.user
+    password = res.password
+    database = res.database
+}
 // 2. 建立与 MySQL 数据库的连接关系
 const db = mysql.createPool({
-    host: '127.0.0.1', // 数据库的 IP 地址
-    user: 'root', // 登录数据库的账号
-    password: '123456', // 登录数据库的密码
-    database: 'chat', // 指定要操作哪个数据库
+    host, // 数据库的 IP 地址
+    port, //端口
+    user, // 登录数据库的账号
+    password, // 登录数据库的密码
+    database, // 指定要操作哪个数据库
     multipleStatements: true,
     charset: 'utf8mb4'
 })
