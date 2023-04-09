@@ -9,7 +9,6 @@
 'use strict'
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-import { getIpAddress } from '@/utils/ipaddr';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -17,9 +16,8 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
-let ipaddress = getIpAddress()
 const winURL = isDevelopment
-  ? `https://${ipaddress}:9999/#/`
+  ? `https://127.0.0.1:9999/#/`
   : 'app://./index.html/#/'
 let win
 async function createWindow() {
@@ -71,7 +69,9 @@ ipcMain.on('open-window', (event, options) => {
   })
   // new_win.webContents.openDevTools()
   // new_win.setMenu(null);
-  new_win.webContents.openDevTools()
+  if(isDevelopment){
+    new_win.webContents.openDevTools()
+  }
   let { room, receiver, beInviter } = options
   if (options.method == 'audio') {
     new_win.loadURL(winURL + `audio?room=${room}&receiver=${receiver}&beInviter=${beInviter}`);

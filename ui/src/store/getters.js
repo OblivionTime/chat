@@ -9,5 +9,6 @@
 const getters = {
   token: state => state.user.token,
   userInfo: state => state.user.userInfo,
+  ipaddress: state => state.user.ipaddress,
 }
 export default getters

@@ -103,8 +103,8 @@ async function SingleConnect(ws, req) {
                 filename = generateRandomString(32) + "." + fileSuffix
                 notExitCreate(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/images`))
                 fs.writeFileSync(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/images/${filename}`), fileContent)
-                msg.content = `https://${getIpAddress()}:8888/uploads/message/${room.replace(/-/g, "_")}/images/${filename}`
-                message.content = `https://${getIpAddress()}:8888/uploads/message/${room.replace(/-/g, "_")}/images/${filename}`
+                msg.content = `/uploads/message/${room.replace(/-/g, "_")}/images/${filename}`
+                message.content = `/uploads/message/${room.replace(/-/g, "_")}/images/${filename}`
                 break
             case 'video':
                 fileContent = Buffer.from(message.content)
@@ -114,15 +114,15 @@ async function SingleConnect(ws, req) {
                 filename = generateRandomString(32) + "." + fileSuffix
                 notExitCreate(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/video`))
                 fs.writeFileSync(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/video/${filename}`), fileContent)
-                msg.content = `https://${getIpAddress()}:8888/uploads/message/${room.replace(/-/g, "_")}/video/${filename}`
-                message.content = `https://${getIpAddress()}:8888/uploads/message/${room.replace(/-/g, "_")}/video/${filename}`
+                msg.content = `/uploads/message/${room.replace(/-/g, "_")}/video/${filename}`
+                message.content = `/uploads/message/${room.replace(/-/g, "_")}/video/${filename}`
                 break
             case 'file':
                 fileContent = Buffer.from(message.content)
                 notExitCreate(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/file`))
                 fs.writeFileSync(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`), fileContent)
-                msg.content = `https://${getIpAddress()}:8888/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
-                message.content = `https://${getIpAddress()}:8888/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
+                msg.content = `/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
+                message.content = `/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
                 break
         }
         if (rooms[room][message.receiver_id]) {

@@ -9,7 +9,7 @@
             <div class="audio-choses" v-if="beInviter">
                 <div style="color: white;">{{ receiver }}发起视频通话</div>
                 <div>
-                    <img src="../../assets/chat/accept.png" alt="" width="50" @click="acceptAudio">
+                    <img src="../../assets/chat/accept.png" alt="" width="50" @click="acceptVideo">
                     <img src="../../assets/chat/reject.png" alt="" width="50" @click="rejectAudio">
                 </div>
             </div>
@@ -24,8 +24,7 @@
                     @timeupdate="updateTime"></video>
             </div>
             <div class="self-video">
-                <video src="" ref="selfvideo" autoplay style="opacity: 1;height: 40vh;object-fit: cover;"
-                    @timeupdate="updateTime2"></video>
+                <video src="" ref="selfvideo" autoplay style="opacity: 1;height: 40vh;object-fit: cover;"></video>
             </div>
             <div class="show-reject" :style="showTimeSty">
                 <div style="color: white;">{{ broadcastTime }}</div>
@@ -84,76 +83,91 @@ export default {
         this.room = this.$route.query.room
     },
     mounted() {
-
+        win.on('close', (event) => {
+            if (this.socket) {
+                this.socket.send(JSON.stringify({
+                    name: "reject",
+                }))
+                this.socket.close()
+            }
+        });
         this.initSocket()
+        this.timer = setTimeout(() => {
+            if (this.socket) {
+                this.socket.send(JSON.stringify({
+                    name: "reject",
+                }))
+                this.socket.close()
+            }
+        }, 6000);
     },
     methods: {
         //初始化websocket
         initSocket() {
-            this.socket = new WebSocket(`wss://192.168.6.40:8888/api/chat/v1/rtc/single?room=${this.room}&username=${this.$store.getters.userInfo.username}`)
+            this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/single?room=${this.room}&username=${this.$store.getters.userInfo.username}`)
             this.socket.onopen = async () => {
                 if (!this.beInviter) {
-                    this.socket.send(JSON.stringify({ "name": "createRoom" }))
+                    let stream
+                    try {
+                        //最新的标准API
+                        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
 
+                    } catch (error) {
+                        try {
+                            //最新的标准API
+                            stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true })
 
-                }
-                win.on('close', (event) => {
-                    if (this.socket) {
-                        this.socket.send(JSON.stringify({
-                            name: "reject",
-                        }))
-                        this.socket.close()
+                        } catch (error2) {
+                            alert("检测到当前设备不支持麦克风和相机,请设置权限后在重试")
+                            this.socket.send(JSON.stringify({
+                                name: "reject",
+                            }))
+                            this.socket.close()
+                            return
+                        }
                     }
-                });
+                    this.localStream = stream
+                    //初始化PC源
+                    this.initPC()
+                    //添加音频流
+                    this.pc.addStream(this.localStream)
+                    //发起邀请
+                    this.socket.send(JSON.stringify({ "name": "createRoom", mode: "video_invitation" }))
+                }
             };
             this.socket.onmessage = (message) => {
                 let data = JSON.parse(message.data)
                 switch (data.name) {
                     case "offer":
-                        this.flag = true
-                        //最新的标准API
-                        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                            .then(stream => {
-                                this.localStream = stream
-                                this.initPC()
-                                this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
-                                this.pc.createAnswer((session_desc) => {
-                                    this.pc.setLocalDescription(session_desc);
-                                    this.socket.send(
-                                        JSON.stringify({
-                                            name: "answer",
-                                            data: {
-                                                sdp: session_desc,
-                                            },
-                                            receiver: this.receiver,
-                                        })
-                                    );
-                                }, (err) => {
-                                    console.log(err);
-                                });
-                            }).catch(err => {
-                                // alert(`当前设备不支持,错误原因=>${err}`)
-                                console.log(`当前设备不支持,错误原因=>${err}`);
-                                this.localStream = ""
-                                this.initPC()
-                                this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
-                                this.pc.createAnswer((session_desc) => {
-                                    this.pc.setLocalDescription(session_desc);
-                                    this.socket.send(
-                                        JSON.stringify({
-                                            name: "answer",
-                                            data: {
-                                                sdp: session_desc,
-                                            },
-                                            receiver: this.receiver,
-                                        })
-                                    );
-                                }, (err) => {
-                                    console.log(err);
-                                });
+                        if (this.timer) {
+                            clearTimeout(this.timer)
+                            this.timer = null
+                        }
+                        try {
+                            this.flag = true
+                            //当收到对方接收请求后,设置音频源,并发送answer给对方
+                            this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
+                            this.pc.createAnswer((session_desc) => {
+                                this.pc.setLocalDescription(session_desc);
+                                this.socket.send(
+                                    JSON.stringify({
+                                        name: "answer",
+                                        data: {
+                                            sdp: session_desc,
+                                        },
+                                        receiver: this.receiver,
+                                    })
+                                )
+                            }, (err) => {
+                                console.log(err);
                             })
+                        } catch (error) {
+                            console.log(error);
+                        }
+
                         break;
                     case "answer":
+                        //设置邀请方发来的音频源
                         this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
                         break
                     case "ice_candidate":
@@ -175,29 +189,38 @@ export default {
             }
         },
         //接收情况
-        acceptAudio() {
-            //最新的标准API
-            window.navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then((stream) => {
-                    this.localStream = stream
-                    this.flag = true
-                    this.$nextTick(() => {
-                        this.initPC()
-                        this.pc.createOffer(this.pcCreateCbGen("peer"), (err) => {
-                            console.log(err);
-                        });
-                        this.$refs.selfvideo.srcObject = this.localStream;
-                    });
-                }).catch((err) => {
-                    this.localStream = ""
-                    this.flag = true
-                    this.$nextTick(() => {
-                        this.initPC()
-                        this.pc.createOffer(this.pcCreateCbGen("peer"), (err) => {
-                            console.log(err);
-                        });
-                    });
+        async acceptVideo() {
+            if (this.timer) {
+                clearTimeout(this.timer)
+                this.timer = null
+            }
+            let stream
+            try {
+                //最新的标准API
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            } catch (error) {
+                //当不支持相机时,只打开麦克风
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+                } catch (error2) {
+                    alert("检测到当前设备不支持麦克风和相机,请设置权限后在重试")
+                    this.socket.send(JSON.stringify({
+                        name: "reject",
+                    }))
+                    this.socket.close()
+                    return
+                }
+            }
+            this.localStream = stream
+            this.flag = true
+            this.$nextTick(() => {
+                this.initPC()
+                this.pc.addStream(this.localStream)
+                this.pc.createOffer(this.pcCreateCbGen("peer"), (err) => {
+                    console.log(err);
                 });
+                // this.$refs.selfvideo.srcObject = this.localStream;
+            });
 
         },
         //拒绝或挂断
@@ -257,16 +280,10 @@ export default {
                     }
                 });
             };
-            if (this.localStream) {
-                pc.addStream(this.localStream)
-            }
             this.pc = pc
         },
         //时间更新
         updateTime() {
-            if (!this.$refs.video) {
-                return
-            }
             let duration = this.$refs.video.currentTime;
             if (duration == 0) {
                 return
@@ -276,15 +293,15 @@ export default {
             var second = parseInt(duration % 60) < 10 ? '0' + parseInt(duration % 60) : parseInt(duration % 60);
             this.broadcastTime = hour + ":" + minute + ":" + second
         },
-        updateTime2() {
-            if (this.localStream) {
-                let duration = this.$refs.selfvideo.currentTime;
-                var hour = parseInt((duration) / 3600) < 10 ? '0' + parseInt((duration) / 3600) : parseInt((duration) / 3600);
-                var minute = parseInt((duration % 3600) / 60) < 10 ? '0' + parseInt((duration % 3600) / 60) : parseInt((duration % 3600) / 60);
-                var second = parseInt(duration % 60) < 10 ? '0' + parseInt(duration % 60) : parseInt(duration % 60);
-                this.broadcastTime = hour + ":" + minute + ":" + second
-            }
-        },
+        // updateTime2() {
+        //     if (this.localStream) {
+        //         let duration = this.$refs.selfvideo.currentTime;
+        //         var hour = parseInt((duration) / 3600) < 10 ? '0' + parseInt((duration) / 3600) : parseInt((duration) / 3600);
+        //         var minute = parseInt((duration % 3600) / 60) < 10 ? '0' + parseInt((duration % 3600) / 60) : parseInt((duration % 3600) / 60);
+        //         var second = parseInt(duration % 60) < 10 ? '0' + parseInt(duration % 60) : parseInt(duration % 60);
+        //         this.broadcastTime = hour + ":" + minute + ":" + second
+        //     }
+        // },
         /**
          * 监听移动
          */
@@ -304,6 +321,10 @@ export default {
                 name: "reject",
             }))
             this.socket.close()
+        }
+        if (this.timer) {
+            clearTimeout(this.timer)
+            this.timer = null
         }
     },
 }

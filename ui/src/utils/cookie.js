@@ -10,6 +10,7 @@ import Cookies from 'js-cookie'
 
 const TokenKey = 'Authorization'
 const NameKey = 'user'
+const IPAddressKey = 'ipaddress'
 
 export function getToken() {
   return localStorage.getItem(TokenKey)
@@ -35,4 +36,15 @@ export function setUser(user) {
 
 export function removeUser() {
   return localStorage.removeItem(NameKey)
+}
+export function getIPaddress() {
+  return localStorage.getItem(IPAddressKey)
+}
+
+export function setIPaddress(ipaddress) {
+  return localStorage.setItem(IPAddressKey, ipaddress)
+}
+
+export function removeIPaddress() {
+  return localStorage.removeItem(IPAddressKey)
 }

@@ -14,12 +14,16 @@ import {
 	getToken,
 	setToken,
 	removeToken,
+	getIPaddress,
+	setIPaddress,
+	removeIPaddress
 
 } from '@/utils/cookie';
 const user = {
 	state: {
 		token: getToken() ? getToken() : '',
 		userInfo: getUser() ? getUser() : '',
+		ipaddress: getIPaddress() ? getIPaddress() : 'https://127.0.0.1:8888',
 	},
 
 	mutations: {
@@ -28,6 +32,9 @@ const user = {
 		},
 		SET_USER: (state, user) => {
 			state.userInfo = user
+		},
+		SET_IPADDRESS: (state, ipaddress) => {
+			state.ipaddress = ipaddress
 		},
 	},
 	actions: {
@@ -75,6 +82,13 @@ const user = {
 		}, userInfo) {
 			commit('SET_USER', userInfo)
 			setUser(userInfo)
+		},
+		//修改服务器地址
+		updateIPAddress({
+			commit
+		}, ipaddress) {
+			commit('SET_IPADDRESS', ipaddress)
+			setIPaddress(ipaddress)
 		},
 	}
 }

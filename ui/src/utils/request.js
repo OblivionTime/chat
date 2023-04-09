@@ -10,8 +10,7 @@ import axios from 'axios'
 import store from '@/store'
 import router from '../router'
 import { Message } from 'element-ui'
-// var baseURL = process.env.VUE_APP_BASE_API
-var baseURL = "https://192.168.6.40:8888/api/chat/v1/"
+var baseURL = `${store.getters.ipaddress}/api/chat/v1/`
 const service = axios.create({
 	baseURL: baseURL,
 	// withCredentials: true,
@@ -23,7 +22,7 @@ service.interceptors.request.use(
 	(config) => {
 		// config.url
 
-		if (store.getters.token){
+		if (store.getters.token) {
 			config.headers['authorization'] = store.getters.token
 		}
 		return config

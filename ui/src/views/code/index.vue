@@ -27,7 +27,6 @@
 
 <script>
 import { mapActions } from "vuex";
-import { getIpAddress } from '@/utils/ipaddr';
 
 export default {
     data() {
@@ -58,8 +57,8 @@ export default {
         },
         initSocket() {
             // let prefix = window.location.host
-            let prefix = getIpAddress() + ":8888"
-            this.socket = new WebSocket(`wss://${prefix}/api/chat/v1/auth/login_code?room=${this.room}&name=user`)
+            // let prefix = getIpAddress() + ":8888"
+            this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/auth/login_code?room=${this.room}&name=user`)
             this.socket.onopen = () => {
                 this.socket.send(JSON.stringify({
                     "operation": "connect",

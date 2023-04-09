@@ -33,12 +33,12 @@
                             {{ item.content }}
                         </div>
                         <div v-else-if="item.type == 'image'">
-                            <el-image :src="item.content" :alt="item.content" style="width: 200px;object-fit:contain"
-                                :preview-src-list="[item.content]" />
+                            <el-image :src="getPath(item.content)" :alt="item.content"
+                                style="width: 200px;object-fit:contain" :preview-src-list="[getPath(item.content)]" />
                         </div>
                         <div v-else-if="item.type == 'video'">
-                            <video :src="item.content" muted style="width: 300px;object-fit:cover"></video>
-                            <div class="play-btn" @click="showVideoDialog = true, currentVideo = item.content"><img
+                            <video :src="getPath(item.content)" muted style="width: 300px;object-fit:cover"></video>
+                            <div class="play-btn" @click="showVideoDialog = true, currentVideo = getPath(item.content)"><img
                                     src="../../../assets/chat/play.png" alt="" width="45"></div>
                         </div>
                         <div v-else-if="item.type == 'file'" class="aChat-file" @click="downloadFile(item.content)">
@@ -107,7 +107,7 @@ const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
 import { EmojiList } from '@/utils/emoji';
 import { getFileSuffix2, getFileSuffix, getFileIcons, getFileName } from '@/utils/file'
-import { getIpAddress } from '@/utils/ipaddr';
+// import { getIpAddress } from '@/utils/ipaddr';
 
 export default {
 
@@ -193,8 +193,8 @@ export default {
                 this.socket = null
             }
             // let prefix = window.location.host
-            let prefix = getIpAddress() + ":8888"
-            this.socket = new WebSocket(`wss://${prefix}/api/chat/v1/message/single?room=${this.room}&id=${this.sender_id}`)
+            // let prefix = getIpAddress() + ":8888"
+            this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/message/single?room=${this.room}&id=${this.sender_id}`)
             this.socket.onopen = () => {
                 console.log('连接成功');
             };
@@ -303,6 +303,7 @@ export default {
         },
         //下载文件
         downloadFile(url) {
+            url = this.ipaddress + url
             var aTag = document.createElement("a");
             aTag.download = getFileName(url);
             aTag.href = url
@@ -316,6 +317,10 @@ export default {
         _getFileName(path) {
             return getFileName(path)
         },
+        //获取文件路径
+        getPath(content) {
+            return this.ipaddress + content
+        },
         /**
          * 音视频相关
          */
@@ -325,7 +330,7 @@ export default {
                 return this.$message.error("正在通话中....")
             }
             const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('open-window', { room: this.room, receiver: 'solid2', beInviter: 0, method: 'audio' });
+            ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'audio' });
         },
         //发送视频邀请
         SendVideoInvitation() {
@@ -333,7 +338,7 @@ export default {
                 return this.$message.error("正在通话中....")
             }
             const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('open-window', { room: this.room, receiver: 'solid2', beInviter: 0, method: 'video' });
+            ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'video' });
         },
         //监听别人打语音视频电话
         initRTCSocket() {
@@ -341,19 +346,28 @@ export default {
                 this.rtcsocket.close()
                 this.rtcsocket = null
             }
-            this.rtcsocket = new WebSocket(`wss://192.168.6.40:8888/api/chat/v1/rtc/single?room=${this.room}&username=${this.username}_listen`)
+            this.rtcsocket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/single?room=${this.room}&username=${this.username}_listen`)
+            const { ipcRenderer } = window.require('electron');
             this.rtcsocket.onmessage = (message) => {
                 let data = JSON.parse(message.data)
                 switch (data.name) {
                     case 'status':
                         this.callActive = data.flag
                         break
-                    case "invitation":
+                    case 'reject':
+                        this.callActive = false
+                        break
+                    case "audio_invitation":
                         if (this.callActive) {
                             return
                         }
-                        const { ipcRenderer } = window.require('electron');
-                        ipcRenderer.send('open-window', { room: this.room, receiver: data.sender, beInviter: 1 });
+                        ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 1, method: 'audio' });
+                        break;
+                    case "video_invitation":
+                        if (this.callActive) {
+                            return
+                        }
+                        ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 1, method: 'video' });
                         break;
                 }
             }

@@ -7,6 +7,9 @@ import 'element-ui/lib/theme-chalk/index.css';
 import '@/permission'
 Vue.use(Element)
 Vue.config.productionTip = false
+//定义全局ip地址
+Vue.prototype.ipaddress = store.getters.ipaddress
+Vue.prototype.wssaddress = store.getters.ipaddress.replace("https://","wss://")
 
 new Vue({
   router,

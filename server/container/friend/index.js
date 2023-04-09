@@ -13,7 +13,6 @@ const { Query } = require('../../db/query');
 function List(req, res) {
     //根据id获取所有分组下的所有好友
     let id = req.user.id
-    console.log(id);
     const sql = 'select id,name from friend_group  where user_id=?'
     db.query(sql, [id], async (err, results) => {
         // 查询数据失败

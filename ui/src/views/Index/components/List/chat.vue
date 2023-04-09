@@ -35,11 +35,15 @@ export default {
     data() {
         return {
             ChatList: [],
-            currentRoom: ''
+            currentRoom: '',
+            timer: ''
         };
     },
     mounted() {
         this.loadData()
+        this.timer = setInterval(() => {
+            this.loadData()
+        }, 1000);
     },
     methods: {
         loadData() {
@@ -71,7 +75,12 @@ export default {
             }
         }
     },
-
+    destroyed() {
+        if (this.timer) {
+            clearInterval(this.timer)
+            this.timer = null
+        }
+    },
 }
 </script>
 

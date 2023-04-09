@@ -75,76 +75,88 @@ export default {
         this.beInviter = this.$route.query.beInviter == 1
         this.receiver = this.$route.query.receiver
         this.room = this.$route.query.room
+
     },
     mounted() {
+        //检测窗口关闭,自动挂断电话
+        win.on('close', (event) => {
+            if (this.socket) {
+                this.socket.send(JSON.stringify({
+                    name: "reject",
+                }))
+                this.socket.close()
+            }
+        });
         this.initSocket()
+        this.timer = setTimeout(() => {
+            if (this.socket) {
+                this.socket.send(JSON.stringify({
+                    name: "reject",
+                }))
+                this.socket.close()
+            }
+        }, 6000);
     },
     methods: {
         //初始化websocket
         initSocket() {
             // let prefix = window.location.host
-            this.socket = new WebSocket(`wss://127.0.0.1:8888/api/chat/v1/rtc/single?room=${this.room}&username=${this.$store.getters.userInfo.username}`)
+            this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/single?room=${this.room}&username=${this.$store.getters.userInfo.username}`)
             this.socket.onopen = async () => {
+                //如果是邀请人则发送创建房间指令
                 if (!this.beInviter) {
-                    this.socket.send(JSON.stringify({ "name": "createRoom" }))
-                }
-                win.on('close', (event) => {
-                    if (this.socket) {
+                    try {
+                        //最新的标准API
+                        let stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+                        this.localStream = stream
+                        //初始化PC源
+                        this.initPC()
+                        //添加音频流
+                        this.pc.addStream(this.localStream)
+                        //发起邀请
+                        this.socket.send(JSON.stringify({ "name": "createRoom", mode: "audio_invitation" }))
+                    } catch (error) {
+                        alert("检测到当前设备不支持麦克风,请设置权限后在重试")
                         this.socket.send(JSON.stringify({
                             name: "reject",
                         }))
                         this.socket.close()
                     }
-                });
+                }
             };
             this.socket.onmessage = (message) => {
                 let data = JSON.parse(message.data)
                 switch (data.name) {
                     case "offer":
-                        this.flag = true
-                        //最新的标准API
-                        navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-                            .then(stream => {
-                                this.localStream = stream
-                                this.initPC()
-                                this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
-                                this.pc.createAnswer((session_desc) => {
-                                    this.pc.setLocalDescription(session_desc);
-                                    this.socket.send(
-                                        JSON.stringify({
-                                            name: "answer",
-                                            data: {
-                                                sdp: session_desc,
-                                            },
-                                            receiver: this.receiver,
-                                        })
-                                    );
-                                }, (err) => {
-                                    console.log(err);
-                                });
-                            }).catch(err => {
-                                // alert(`当前设备不支持,错误原因=>${err}`)
-                                console.log(`当前设备不支持,错误原因=>${err}`);
-                                this.localStream = ""
-                                this.initPC()
-                                this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
-                                this.pc.createAnswer((session_desc) => {
-                                    this.pc.setLocalDescription(session_desc);
-                                    this.socket.send(
-                                        JSON.stringify({
-                                            name: "answer",
-                                            data: {
-                                                sdp: session_desc,
-                                            },
-                                            receiver: this.receiver,
-                                        })
-                                    );
-                                }, (err) => {
-                                    console.log(err);
-                                });
+                        if (this.timer) {
+                            clearTimeout(this.timer)
+                            this.timer = null
+                        }
+                        try {
+                            this.flag = true
+                            //当收到对方接收请求后,设置音频源,并发送answer给对方
+                            this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
+                            this.pc.createAnswer((session_desc) => {
+                                this.pc.setLocalDescription(session_desc);
+                                this.socket.send(
+                                    JSON.stringify({
+                                        name: "answer",
+                                        data: {
+                                            sdp: session_desc,
+                                        },
+                                        receiver: this.receiver,
+                                    })
+                                )
+                            }, (err) => {
+                                console.log(err);
                             })
+                        } catch (error) {
+                            console.log(error);
+                        }
+
                         break;
                     case "answer":
+                        //设置邀请方发来的音频源
                         this.pc.setRemoteDescription(new nativeRTCSessionDescription(data.data.sdp));
                         break
                     case "ice_candidate":
@@ -166,29 +178,30 @@ export default {
             }
         },
         //接收情况
-        acceptAudio() {
-            //最新的标准API
-            window.navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-                .then((stream) => {
-                    this.localStream = stream
-                    this.flag = true
-                    this.$nextTick(() => {
-                        this.initPC()
-                        this.pc.createOffer(this.pcCreateCbGen("peer"), (err) => {
-                            console.log(err);
-                        });
-                        this.$refs.selfvideo.srcObject = this.localStream;
-                    });
-                }).catch((err) => {
-                    this.localStream = ""
-                    this.flag = true
-                    this.$nextTick(() => {
-                        this.initPC()
-                        this.pc.createOffer(this.pcCreateCbGen("peer"), (err) => {
-                            console.log(err);
-                        });
+        async acceptAudio() {
+            try {
+                if (this.timer) {
+                    clearTimeout(this.timer)
+                    this.timer = null
+                }
+                //最新的标准API
+                let stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+                this.localStream = stream
+                this.flag = true
+                this.$nextTick(() => {
+                    this.initPC()
+                    this.pc.addStream(this.localStream)
+                    this.pc.createOffer(this.pcCreateCbGen("peer"), (err) => {
+                        console.log(err);
                     });
                 });
+            } catch (error) {
+                alert("检测到当前设备不支持麦克风,请设置权限后在重试")
+                this.socket.send(JSON.stringify({
+                    name: "reject",
+                }))
+                this.socket.close()
+            }
         },
         //拒绝或挂断
         rejectAudio() {
@@ -244,7 +257,7 @@ export default {
                     this.$refs.video.srcObject = stream;
                 });
             };
-            pc.addStream(this.localStream)
+
             this.pc = pc
         },
         //时间更新
@@ -266,6 +279,10 @@ export default {
                 name: "reject",
             }))
             this.socket.close()
+        }
+        if (this.timer) {
+            clearTimeout(this.timer)
+            this.timer = null
         }
     },
 }

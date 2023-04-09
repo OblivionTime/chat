@@ -32,7 +32,7 @@ async function SingleRTCConnect(ws, req) {
             case 'createRoom':
                 //发送邀请
                 msg = {
-                    name: "invitation",
+                    name: message.mode,
                     sender: username
                 }
                 BroadcastSocket(username, room, msg)
@@ -77,7 +77,6 @@ async function SingleRTCConnect(ws, req) {
                 break
             //被邀请方拒绝
             case 'reject':
-                console.log('reject');
                 //发送offer
                 msg = {
                     name: "reject",
