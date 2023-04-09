@@ -2,7 +2,7 @@
     <div class="audio-bg">
         <div class="audio-cover" v-if="!flag"></div>
         <div class="audio-content" v-if="!flag">
-            <div class="audio-avatar" v-if="beInviter">
+            <div class="audio-avatar" >
                 <img src="../../assets/sidebar/avatar.jpg" alt=""
                     style="width: 100px;height: 100px;object-fit: cover;object-position: center;">
             </div>
