@@ -1,11 +1,17 @@
 // 1. 导入 mysql和fs 模块
 const mysql = require('mysql')
 const fs = require('fs')
+/**
+ * 初始化参数
+ */
 let host = '127.0.0.1'
 let port = 3306
 let user = 'root'
 let password = '123456'
 let database = 'chat'
+/**
+ * 如果配置文件存在,则读取配置文件,不存在则默认
+ */
 if (fs.existsSync("config.json")) {
     var res = JSON.parse(fs.readFileSync(`config.json`))
     host = res.host

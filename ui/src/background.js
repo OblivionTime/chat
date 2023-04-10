@@ -39,7 +39,7 @@ async function createWindow() {
   if (isDevelopment) {
     win.webContents.openDevTools()
   } else {
-    // win.setMenu(null);
+    win.setMenu(null);
     createProtocol('app')
   }
   win.loadURL(winURL)

@@ -1,7 +1,7 @@
 <template>
     <div class="sidebar" @click="showMenu = false">
         <div class="avatar" style=" cursor: pointer;" @click="openInfoDialog">
-            <img :src="userInfo.avatar" alt="" width="35" height="35" style="object-fit: cover;">
+            <img :src="getPath(userInfo.avatar)" alt="" width="35" height="35" style="object-fit: cover;">
             <div class="avatar-onlie"></div>
         </div>
         <div class="sidebar-items">
@@ -103,8 +103,8 @@ export default {
         let username = this.$store.getters.userInfo.username
         this.text = `http://${prefix}/#/code?username=${username}`
         this.userInfo = this.$store.getters.userInfo
-        this.userInfo.avatar = this.userInfo.avatar ? this.userInfo.avatar : require("@/assets/logo.png")
-        this.photo = this.userInfo.avatar
+        let avatar = this.getPath(this.userInfo.avatar) ? this.getPath(this.userInfo.avatar) : require("@/assets/logo.png")
+        this.photo =avatar
         if (this.$store.getters.userInfo.phone) {
             this.phoneFlag = false
         }
@@ -217,7 +217,11 @@ export default {
                     })
 
             })
-        }
+        },
+        //获取文件路径
+        getPath(content) {
+            return this.ipaddress + content
+        },
     },
 
 }

@@ -7,7 +7,6 @@ module.exports = {
 let { RespParamErr, RespServerErr, RespExitFriendErr, RespUpdateErr, RespCreateErr, RespExitGroupErr } = require('../../model/error');
 const { RespError, RespSucess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
-const { getIpAddress } = require('../../utils/ipaddr');
 const { v4: uuidv4 } = require('uuid');
 async function List(req, res) {
     //根据id获取所有分组下的所有好友
@@ -48,7 +47,7 @@ async function CreateGroupChat(req, res) {
     }
 
     if (fileName) {
-        group_chat.avatar = `https://${getIpAddress()}:8888/uploads/group/${fileName}`
+        group_chat.avatar = `/uploads/group/${fileName}`
     }
 
     //创建群聊

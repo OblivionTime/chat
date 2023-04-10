@@ -5,11 +5,13 @@ module.exports = {
 };
 let { RespParamErr, RespServerErr, RespExitFriendErr, RespUpdateErr, RespCreateErr } = require('../../model/error');
 const { v4: uuidv4 } = require('uuid');
-
-
 const { RespError, RespSucess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
-//获取好友列表
+/**
+ * 获取好友列表
+ * 1.根据当前用户的id获取其所有好友分组的id和name
+ * 2.然后再根据getFriendList传入好友分组的id获得相应的好友,最后插入到friendList中
+ */
 function List(req, res) {
     //根据id获取所有分组下的所有好友
     let id = req.user.id
@@ -33,7 +35,13 @@ function List(req, res) {
         return RespData(res, friendList)
     })
 }
-//添加好友
+/**
+ * 添加好友
+ * 1.先判断当前好友是否已经是自己的好友了
+ * 2.不存在则插入friend表中
+ * 3.并将自己也插入到别人的好友列表中
+ * 4.当前用户向对方发送一条消息,也就是向message表插入一条数据
+ */
 async function AddFriend(req, res) {
     //获取当前登录用户的个人信息
     let user = req.user
@@ -101,7 +109,12 @@ async function AddFriend(req, res) {
     await Query(sql, { room: uuid, total: 1 })
     return RespSucess(res)
 }
-//查询用户
+/**
+ * 查询用户
+ * 1.查询用户表,模糊查询
+ * 2.判断查询出来的数据中,判断是否存在已经好友的现象
+ * 3.筛选出已经是好友的和不是好友的
+ */
 async function SearchUser(req, res) {
     const { username } = req.query
     let sql = 'select * from user where username like ?'

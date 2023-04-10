@@ -9,9 +9,15 @@ const { RespError, RespSucess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
 const fs = require('fs');
 const { generateRandomString, notExitCreate } = require('../../utils/utils')
-const { getIpAddress } = require('../../utils/ipaddr');
 let rooms = {}
-//获取消息列表
+/**
+ * 获取消息列表
+ * 1.先获取好友聊天列表
+ * 2.先根据好友分组表中获取当前用户的所有好友分组id,然后根据分组id获取指定房间的用户的所有聊天记录,在根据消息统计表获取最后一次发送消息的时间
+ * 3.如何根据对方id和房间号获取未读消息的数量
+ * 4.根据房间号和创建时间获取最后一次消息内容
+ * 5.根据房间号获取群聊历史记录
+ */
 async function List(req, res) {
     let data = []
     let id = req.user.id
@@ -52,7 +58,18 @@ async function List(req, res) {
     })
     return RespData(res, data)
 }
-//建立聊天
+/**
+ * 建立聊天
+ * 1.获取房间号和对方id
+ * 2. 根据房间号获取所有聊天记录
+ * 3.将当前用户的所有未读变成已读
+ * 4.监听message
+ * 5.消息类型目前分为text(文本),image(图片),video(视频),file(文件)
+ * 6.text文本不做任何处理
+ * 7. image(图片),video(视频),file(文件)先获取文件名,在判断存储的目录是否存在,不存在则创建,然后将其进行保存,并发送相关存储路径给前端
+ * 8.插入数据到message表中
+ * 9.并修改当前房间的最早一次的聊天时间
+ */
 async function SingleConnect(ws, req) {
     //获取name
     let url = req.url.split("?")[1];

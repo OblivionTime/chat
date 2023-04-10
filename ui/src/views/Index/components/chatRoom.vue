@@ -26,7 +26,7 @@
             <div class="chat-content" ref="record">
                 <div :class="item.sender_id == sender_id ? 'self' : 'other'" v-for="item, index in chatList" :key="index">
                     <div class="avatar" :class="'avatar-' + item.type">
-                        <img :src="item.avatar ? item.avatar : require('@/assets/logo.png')" alt="" srcset="" width="45px"
+                        <img :src="item.avatar ? getPath(item.avatar) : require('@/assets/logo.png')" alt="" srcset="" width="45px"
                             height="45px">
                     </div>
                     <div class="aChat" style="white-space: pre-wrap;" :class="item.type">

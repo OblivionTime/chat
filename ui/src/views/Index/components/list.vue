@@ -36,7 +36,7 @@
                                 <div class="list-item-desc">
                                     <p class="list-item-username">{{ item.name }}({{ item.username }})</p>
                                     <button v-if="!item.status" @click="addFriend(item.username, item.id)">加好友</button>
-                                    <button v-else>去聊天</button>
+                                    <button v-else @click="toChat">去聊天</button>
                                 </div>
                             </div>
                         </div>
@@ -401,6 +401,12 @@ export default {
         },
         loadListData() {
             this.$refs.chat.loadData()
+        },
+        //去聊天
+        toChat() {
+            this.current = 'chat'
+            this.$emit('ListCHangeStatus', 'chat');
+            this.showAddDialog = false;
         }
     },
 }

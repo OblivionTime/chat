@@ -100,11 +100,14 @@ export default {
     methods: {
         //初始化websocket
         initSocket() {
-            // let prefix = window.location.host
             this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/single?room=${this.room}&username=${this.$store.getters.userInfo.username}`)
             this.socket.onopen = async () => {
                 //如果是邀请人则发送创建房间指令
                 if (!this.beInviter) {
+                    /**
+                     * 1.邀请人先创建麦克风并初始化PC源
+                     * 2.发送创建房间的指令到当前房间,后端接受到指令后,给当前房间的所有用户发送响应的指令
+                     */
                     try {
                         //最新的标准API
                         let stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true })
@@ -127,6 +130,10 @@ export default {
             this.socket.onmessage = (message) => {
                 let data = JSON.parse(message.data)
                 switch (data.name) {
+                    /**
+                     * 1.邀请人接受到对方同意的指令后,将对方的音视频流通过setRemoteDescription函数进行存储
+                     * 2.存储完后邀请人创建answer来获取自己的音视频流,通过setLocalDescription函数存储自己的音视频流,并发送answer指令(携带自己的音视频)告诉对方要存储邀请人的音视频
+                     */
                     case "offer":
                         if (this.timer) {
                             clearTimeout(this.timer)
@@ -179,6 +186,14 @@ export default {
         },
         //接收情况
         async acceptAudio() {
+            /**
+             * 1.点击同意后
+             * 2.获取自己的视频流
+             * 3.初始化PC源
+             * 4.PC添加音视频流
+             * 5.创建offer,获取自己的音视频流,并通过setLocalDescription函数存储自己的音视频流
+             * 6.并发送peer指令(携带自己的音视频)告诉邀请人要存储自己的音视频
+             */
             try {
                 if (this.timer) {
                     clearTimeout(this.timer)
