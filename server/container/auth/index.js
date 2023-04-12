@@ -91,7 +91,7 @@ async function Register(req, res) {
     let result2 = res2.results
     // 执行 SQL 语句失败了
     if (err) return RespError(res, RespServerErr)
-    if (results2.affectedRows === 1) {
+    if (result2.affectedRows === 1) {
         getUserInfo(username, (info) => {
             let friend_group = {
                 user_id: info.id,
