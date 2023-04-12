@@ -1,5 +1,6 @@
 
 let { RespMap } = require('./error')
+// RespMap[respCode] "参数有错误"
 function respHttp(res, respCode, data) {
     let resp = {
         code: 200,

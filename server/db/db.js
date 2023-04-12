@@ -8,7 +8,7 @@ let host = '127.0.0.1'
 let port = 3306
 let user = 'root'
 let password = '123456'
-let database = 'chat'
+let database = 'mychat'
 /**
  * 如果配置文件存在,则读取配置文件,不存在则默认
  */

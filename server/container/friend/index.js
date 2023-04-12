@@ -68,13 +68,13 @@ async function AddFriend(req, res) {
         username: username,
         avatar: info.avatar,
         remark: username,
-        group_id: results[0].id,
+        group_id: results[0]?.id,
         user_id: id,
         room: uuid
     }
     sql = 'insert into friend  set ?'
     //添加好友
-    resp = await Query(sql, friendInfo)
+    let resp = await Query(sql, friendInfo)
     if (resp.err) {
         return RespError(res, RespCreateErr)
     }
@@ -85,7 +85,7 @@ async function AddFriend(req, res) {
         username: user.username,
         avatar: "",
         remark: user.username,
-        group_id: usr2.results[0].id,
+        group_id: usr2.results[0]?.id,
         user_id: user.id,
         room: uuid
     }
@@ -96,7 +96,7 @@ async function AddFriend(req, res) {
     //发送消息
     let message = {
         sender_id: user.id,
-        receiver_id: usr2.results[0].user_id,
+        receiver_id: usr2.results[0]?.user_id,
         type: 'private',
         media_type: 'text',
         status: 0,

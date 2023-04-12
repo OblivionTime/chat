@@ -60,7 +60,7 @@ module.exports = {
 
 
                 },
-                productName: "翎",  //应用的名称
+                productName: "red润",  //应用的名称
                 artifactName: '${productName}.${ext}'
             },
             // nodeIntegration: true,

@@ -36,11 +36,15 @@ const cors = (req, res, next) => {
 const bodyParser = require("body-parser");
 app.use(bodyParser.json({ limit: '100mb' })); //parse application/json
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true })); //parse application/json
-
+// post; login.register.forget_password,updateInfo  ws: login_code
 let indexRouter = require('./routes/auth')();
+// get:list,search post:add_friend
 let friendRouter = require('./routes/friend')();
+// get: list,create_group,search,join
 let groupRouter = require('./routes/group')();
+// get:list ws:single
 let messageRouter = require('./routes/message')();
+// ws: single
 let rtcRouter = require('./routes/rtc')();
 
 app.use('/api/chat/v1/auth', cors, indexRouter);

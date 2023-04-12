@@ -3,7 +3,7 @@
         <div class="header">
             <div class="header-left">
                 <img src="../../assets/logo.png" alt="" width="25px">
-                <span style="font-size: 16px;margin-left: 5px;">翎</span>
+                <span style="font-size: 16px;margin-left: 5px;">red润</span>
             </div>
             <div class="header-right">
                 <img src="../../assets/login/settings.png" alt="" width="20px" class="header-icon" @click="toSettings">

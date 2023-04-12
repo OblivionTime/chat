@@ -34,7 +34,10 @@ async function List(req, res) {
         results[index].lastMessage = r.results[0].lastMessage
         results[index].type = r.results[0].type
     }
-    data.push(...results)
+    // 处理 一开始查询结果可能为空 results的值undefined导致报错
+    if(results){
+        data.push(...results)
+    }
     // 查询数据失败
     if (err) return RespError(res, RespServerErr)
     //获取所有群聊聊天列表

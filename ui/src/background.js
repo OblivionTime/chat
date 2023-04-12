@@ -23,7 +23,7 @@ let win
 async function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    title: "翎",
+    title: "RedRun",
     icon: "./assets/logo.png",
     width: 400,
     useContentSize: true,
