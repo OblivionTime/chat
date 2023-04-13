@@ -7,7 +7,7 @@ global.db = db
 * 初始化状态码并设置为全局变量 
 */
 const resp = require("./model/resp.js")
-global.RespSucess = resp.RespSucess
+global.RespSuccess = resp.RespSuccess
 global.RespError = resp.RespError
 global.RespData = resp.RespData
 /**
@@ -16,7 +16,7 @@ global.RespData = resp.RespData
 var expressWs = require('express-ws');
 var app = require('./app/app');
 /**
- * 读取证书文件
+ * 读取https证书文件
  */
 let fs = require("fs");
 const httpsOption = {
@@ -26,7 +26,7 @@ const httpsOption = {
 /**
  * 初始化https
  */
-server = require("https").createServer(httpsOption, app);
+let server = require("https").createServer(httpsOption, app);
 /**
  * 设置最大传输文件大小
  */
@@ -35,6 +35,7 @@ let displayRoutes = require('express-routemap');
 
 //启动服务
 server.listen("8888", "0.0.0.0", function () {
+    // 显示所有 路由api
     displayRoutes(app);
     console.log(`http running at https://127.0.0.1:8888`);
 });

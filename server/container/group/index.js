@@ -5,7 +5,7 @@ module.exports = {
     JoinGroupChat
 };
 let { RespParamErr, RespServerErr, RespExitFriendErr, RespUpdateErr, RespCreateErr, RespExitGroupErr } = require('../../model/error');
-const { RespError, RespSucess, RespData } = require('../../model/resp');
+const { RespError, RespSuccess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
 const { v4: uuidv4 } = require('uuid');
 async function List(req, res) {
@@ -88,7 +88,7 @@ async function CreateGroupChat(req, res) {
             await Query(sql, memberInfo)
         }
 
-        return RespSucess(res)
+        return RespSuccess(res)
     }
     return RespError(res, RespCreateErr)
 }
@@ -132,5 +132,5 @@ async function JoinGroupChat(req, res) {
     err = resp.err
     // 查询数据失败
     if (err) return RespError(res, RespServerErr)
-    return RespSucess(res)
+    return RespSuccess(res)
 }

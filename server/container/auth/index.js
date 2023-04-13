@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const secretKey = 'xWbiNA3FqnK77MnVCj5CAcfA-VlXj7xoQLd1QaAme6l_t0Yp1TdHbSw';
 let rooms = {}
 let { RespUserOrPassErr, RespParamErr, RespServerErr, RespUserExitErr, RespUpdateErr, RespUserNotExitErr } = require('../../model/error');
-const { RespData, RespSucess } = require('../../model/resp');
+const { RespData, RespSuccess } = require('../../model/resp');
 const { Query } = require('../../db/query');
 /**
  * 登录基本逻辑
@@ -91,7 +91,7 @@ async function Register(req, res) {
     let result2 = res2.results
     // 执行 SQL 语句失败了
     if (err) return RespError(res, RespServerErr)
-    if (results2.affectedRows === 1) {
+    if (result2.affectedRows === 1) {
         getUserInfo(username, (info) => {
             let friend_group = {
                 user_id: info.id,
@@ -175,7 +175,7 @@ async function ForgetPassword(req, res) {
         // 执行 SQL 语句失败了
         if (err) return RespError(res, RespServerErr)
         if (results.affectedRows === 1) {
-            return RespSucess(res)
+            return RespSuccess(res)
         }
         return RespError(res, RespUpdateErr)
 

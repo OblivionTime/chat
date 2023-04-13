@@ -1,0 +1,189 @@
+{
+    "type": 2,
+    "invocationId": "1",
+    "item": {
+        "messages": [
+            {
+                "text": "go和java的区别",
+                "author": "user",
+                "from": {
+                    "id": "1055518985941700",
+                    "name": null
+                },
+                "createdAt": "2023-04-11T02:11:37.9757738+00:00",
+                "timestamp": "2023-04-11T02:11:37.9724989+00:00",
+                "locale": "en-us",
+                "market": "en-us",
+                "region": "us",
+                "messageId": "6f924354-8d37-47d3-9ee9-4094c21d85dc",
+                "requestId": "6f924354-8d37-47d3-9ee9-4094c21d85dc",
+                "nlu": {
+                    "scoredClassification": {
+                        "classification": "CHAT_GPT",
+                        "score": null
+                    },
+                    "classificationRanking": [
+                        {
+                            "classification": "CHAT_GPT",
+                            "score": null
+                        }
+                    ],
+                    "qualifyingClassifications": null,
+                    "ood": null,
+                    "metaData": null,
+                    "entities": null
+                },
+                "offense": "None",
+                "feedback": {
+                    "tag": null,
+                    "updatedOn": null,
+                    "type": "None"
+                },
+                "contentOrigin": "cib",
+                "privacy": null,
+                "inputMethod": "Keyboard"
+            },
+            {
+                "text": "Go和Java之间的主要区别有很多，这里我简单列举一些：\n- Go的指针仅限于数组和对象，它们可以提供指向任何类型的值的指针。Java中的指针是对对象的引用；\n- Go不使用异常来显示运行时和寿命终止之类的事件，而是使用错误来显示此类事件；\n- Go基本上被编译为机器代码。Java支持省略检查以处理和捕获错误；\n- Go提供垃圾回收，但是像Java一样，它不支持完整的GC；\n- Go上不允许函数重载，必须具有唯一的方法和函数名称。Java允许函数重载[^1^]。\n\n你想知道更多关于Go和Java的区别吗？",
+                "author": "bot",
+                "createdAt": "2023-04-11T02:11:42.0983053+00:00",
+                "timestamp": "2023-04-11T02:11:42.0983053+00:00",
+                "messageId": "f9c4f3cb-f0ac-4150-91de-44087d0603f3",
+                "requestId": "6f924354-8d37-47d3-9ee9-4094c21d85dc",
+                "offense": "None",
+                "adaptiveCards": [
+                    {
+                        "type": "AdaptiveCard",
+                        "version": "1.0",
+                        "body": [
+                            {
+                                "type": "TextBlock",
+                                "text": "[1]: https://zhuanlan.zhihu.com/p/85545445 \"Go Vs Java - 知乎 - 知乎专栏\"\n[2]: https://www.php.cn/java-article-417582.html \"go语言和java之间的区别是什么？go语言和java的简单比较-java教程-PHP中文网\"\n[3]: https://www.zhihu.com/question/328685424 \"go语言和java语言的区别？ - 知乎\"\n[4]: https://zhuanlan.zhihu.com/p/420759580 \"阿里架构师总结Go语言和java语言之间的对比联系 - 知乎\"\n[5]: https://zhuanlan.zhihu.com/p/361231998 \"Golang与Java各方面使用对比（上） - 知乎 - 知乎专栏\"\n\nGo和Java之间的主要区别有很多，这里我简单列举一些：\n- Go的指针仅限于数组和对象，它们可以提供指向任何类型的值的指针。Java中的指针是对对象的引用；\n- Go不使用异常来显示运行时和寿命终止之类的事件，而是使用错误来显示此类事件；\n- Go基本上被编译为机器代码。Java支持省略检查以处理和捕获错误；\n- Go提供垃圾回收，但是像Java一样，它不支持完整的GC；\n- Go上不允许函数重载，必须具有唯一的方法和函数名称。Java允许函数重载[^1^][1]。\n\n你想知道更多关于Go和Java的区别吗？\n",
+                                "wrap": true
+                            },
+                            {
+                                "type": "TextBlock",
+                                "size": "small",
+                                "text": "Learn more: [1. zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/85545445) [2. www.php.cn](https://www.php.cn/java-article-417582.html) [3. www.zhihu.com](https://www.zhihu.com/question/328685424) [4. zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/420759580) [5. zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/361231998)",
+                                "wrap": true
+                            }
+                        ]
+                    }
+                ],
+                "sourceAttributions": [
+                    {
+                        "providerDisplayName": "Go Vs Java - 知乎 - 知乎专栏",
+                        "seeMoreUrl": "https://zhuanlan.zhihu.com/p/85545445",
+                        "searchQuery": "go和java的区别"
+                    },
+                    {
+                        "providerDisplayName": "go语言和java之间的区别是什么？go语言和java的简单比较-java教程-PHP中文网",
+                        "seeMoreUrl": "https://www.php.cn/java-article-417582.html",
+                        "imageLink": "https://bing.com/th?id=OIP.3iTGPdZKiHXwPJaJAzN-XgHaC9&pid=cdx",
+                        "imageWidth": "800",
+                        "imageHeight": "320",
+                        "imageFavicon": "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",
+                        "searchQuery": "go和java的区别"
+                    },
+                    {
+                        "providerDisplayName": "go语言和java语言的区别？ - 知乎",
+                        "seeMoreUrl": "https://www.zhihu.com/question/328685424",
+                        "searchQuery": "go和java的区别"
+                    },
+                    {
+                        "providerDisplayName": "阿里架构师总结Go语言和java语言之间的对比联系 - 知乎",
+                        "seeMoreUrl": "https://zhuanlan.zhihu.com/p/420759580",
+                        "searchQuery": "go和java的区别"
+                    },
+                    {
+                        "providerDisplayName": "Golang与Java各方面使用对比（上） - 知乎 - 知乎专栏",
+                        "seeMoreUrl": "https://zhuanlan.zhihu.com/p/361231998",
+                        "imageLink": "https://bing.com/th?id=OIP.VijvB3isI2uAwb6LBIofhQHaEK&pid=cdx",
+                        "imageWidth": "700",
+                        "imageHeight": "393",
+                        "imageFavicon": "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",
+                        "searchQuery": "go和java的区别"
+                    }
+                ],
+                "feedback": {
+                    "tag": null,
+                    "updatedOn": null,
+                    "type": "None"
+                },
+                "contentOrigin": "DeepLeo",
+                "privacy": null,
+                "suggestedResponses": [
+                    {
+                        "text": "请告诉我更多关于Go和Java的区别。",
+                        "author": "user",
+                        "createdAt": "2023-04-11T02:11:48.5980464+00:00",
+                        "timestamp": "2023-04-11T02:11:48.5980464+00:00",
+                        "messageId": "bea6c093-8bdf-4cdc-bc53-2f79c220e861",
+                        "messageType": "Suggestion",
+                        "offense": "Unknown",
+                        "feedback": {
+                            "tag": null,
+                            "updatedOn": null,
+                            "type": "None"
+                        },
+                        "contentOrigin": "DeepLeo",
+                        "privacy": null
+                    },
+                    {
+                        "text": "我想知道Go和Java在性能方面有什么区别。",
+                        "author": "user",
+                        "createdAt": "2023-04-11T02:11:48.5980547+00:00",
+                        "timestamp": "2023-04-11T02:11:48.5980547+00:00",
+                        "messageId": "4abf2d4f-58a4-4aec-a316-4eaf693df840",
+                        "messageType": "Suggestion",
+                        "offense": "Unknown",
+                        "feedback": {
+                            "tag": null,
+                            "updatedOn": null,
+                            "type": "None"
+                        },
+                        "contentOrigin": "DeepLeo",
+                        "privacy": null
+                    },
+                    {
+                        "text": "我想知道Go和Java在并发方面有什么区别。",
+                        "author": "user",
+                        "createdAt": "2023-04-11T02:11:48.5980551+00:00",
+                        "timestamp": "2023-04-11T02:11:48.5980551+00:00",
+                        "messageId": "bed5e5ba-0d73-4d1f-bd34-95bac60285dd",
+                        "messageType": "Suggestion",
+                        "offense": "Unknown",
+                        "feedback": {
+                            "tag": null,
+                            "updatedOn": null,
+                            "type": "None"
+                        },
+                        "contentOrigin": "DeepLeo",
+                        "privacy": null
+                    }
+                ],
+                "spokenText": "你想知道更多关于Go和Java的区别吗？"
+            }
+        ],
+        "firstNewMessageIndex": 1,
+        "conversationId": "51D|BingProd|8F9302A3E881A61E0323111C29DD8DA52C9362044F68A940FDE0BD88AE805D58",
+        "requestId": "6f924354-8d37-47d3-9ee9-4094c21d85dc",
+        "conversationExpiryTime": "2023-04-11T08:11:48.69552Z",
+        "telemetry": {
+            "metrics": null,
+            "startTime": "2023-04-11T02:11:37.9727527Z"
+        },
+        "throttling": {
+            "maxNumUserMessagesInConversation": 20,
+            "numUserMessagesInConversation": 4
+        },
+        "result": {
+            "value": "Success",
+            "message": "go和java的区别",
+            "serviceVersion": "20230408.2"
+        }
+    }
+}{
+    "type": 3,
+    "invocationId": "1"
+}

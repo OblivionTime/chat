@@ -7,7 +7,10 @@
                 <img src="../../assets/login/server.png" alt="" width="20px" class="form-icon">
                 <input type="text" placeholder="服务器地址" v-model="ipaddress">
             </div>
-
+            <div class="form-user">
+                <img src="../../assets/login/server.png" alt="" width="20px" class="form-icon">
+                <input type="text" placeholder="代理地址" v-model="proxyaddress">
+            </div>
 
             <button class="form-button" @click="submitForm">
                 <span class="form-btn-text"> 保存</span>
@@ -24,23 +27,26 @@
 <script>
 import { UserUpdatePassword, } from "@/api/auth.js";
 import { mapActions } from "vuex";
+import { validURL } from '@/utils/validate';
 export default {
     data() {
         return {
             sty: "",
-            ipaddress: ""
         }
     },
-    mounted() {
-        this.ipaddress = this.$store.getters.ipaddress
-    },
     methods: {
-        ...mapActions(["updateIPAddress"]),
+        ...mapActions(["updateAddress"]),
         submitForm() {
             if (!this.ipaddress) {
                 return this.$message.warning("请输入服务器地址!!!")
             }
-            this.updateIPAddress(this.ipaddress)
+            if (!validURL(this.ipaddress)) {
+                return this.$message.error("服务器格式错误!!")
+            }
+            if (this.proxyaddress && !validURL(this.proxyaddress)) {
+                return this.$message.error("代理服务器格式错误!!")
+            }
+            this.updateAddress({ ipaddress: this.ipaddress, proxyaddress: this.proxyaddress })
             this.$message.success("保存成功")
             setTimeout(() => {
                 location.reload()
@@ -84,31 +90,6 @@ export default {
                 width: 200px;
                 border: 0px;
                 padding: 5px 0 5px 25px;
-                box-sizing: border-box;
-                border-bottom: 1px solid #eee;
-                font-size: 14px;
-                outline: none;
-                margin-bottom: 5px;
-
-                &:focus {
-                    border-bottom-color: #5ccdf8;
-                }
-            }
-        }
-
-        .form-code {
-            position: relative;
-
-            .code {
-                position: absolute;
-                right: 0px;
-                top: 0;
-            }
-
-            input {
-                width: 200px;
-                border: 0px;
-                padding: 5px 0;
                 box-sizing: border-box;
                 border-bottom: 1px solid #eee;
                 font-size: 14px;

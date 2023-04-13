@@ -15,7 +15,7 @@ function respHttp(res, respCode, data) {
     res.json(resp)
 }
 
-function RespSucess(res) {
+function RespSuccess(res) {
     respHttp(res, 200)
 }
 
@@ -27,7 +27,7 @@ function RespData(res, data) {
     respHttp(res, 200, data)
 }
 module.exports = {
-    RespSucess,
+    RespSuccess,
     RespError,
     RespData
 }

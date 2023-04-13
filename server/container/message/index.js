@@ -5,7 +5,7 @@ module.exports = {
 const path = require('path');
 
 let { RespParamErr, RespServerErr, RespExitFriendErr, RespUpdateErr, RespCreateErr } = require('../../model/error');
-const { RespError, RespSucess, RespData } = require('../../model/resp');
+const { RespError, RespSuccess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
 const fs = require('fs');
 const { generateRandomString, notExitCreate } = require('../../utils/utils')
@@ -34,7 +34,10 @@ async function List(req, res) {
         results[index].lastMessage = r.results[0].lastMessage
         results[index].type = r.results[0].type
     }
-    data.push(...results)
+    // 处理 一开始查询结果可能为空 results的值undefined导致报错
+    if (results) {
+        data.push(...results)
+    }
     // 查询数据失败
     if (err) return RespError(res, RespServerErr)
     //获取所有群聊聊天列表

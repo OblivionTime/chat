@@ -5,7 +5,7 @@ module.exports = {
 };
 let { RespParamErr, RespServerErr, RespExitFriendErr, RespUpdateErr, RespCreateErr } = require('../../model/error');
 const { v4: uuidv4 } = require('uuid');
-const { RespError, RespSucess, RespData } = require('../../model/resp');
+const { RespError, RespSuccess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
 /**
  * 获取好友列表
@@ -74,7 +74,7 @@ async function AddFriend(req, res) {
     }
     sql = 'insert into friend  set ?'
     //添加好友
-    resp = await Query(sql, friendInfo)
+    let resp = await Query(sql, friendInfo)
     if (resp.err) {
         return RespError(res, RespCreateErr)
     }
@@ -107,7 +107,7 @@ async function AddFriend(req, res) {
     await Query(sql, message)
     sql = 'insert into message_statistics set ?'
     await Query(sql, { room: uuid, total: 1 })
-    return RespSucess(res)
+    return RespSuccess(res)
 }
 /**
  * 查询用户

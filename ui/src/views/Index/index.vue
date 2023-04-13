@@ -1,8 +1,9 @@
 <template>
     <div class="container" @click="showAdd = false">
-        <SideBar @changeStatus="changeStatus" ref="SideBar"></SideBar>
-        <List :current="current"  ref="List" @ListCHangeStatus="ListCHangeStatus" @chooseRoom="chooseRoom"></List>
-        <chatRoom :options="options" @updateList="updateList"></chatRoom>
+        <SideBar @changeStatus="changeStatus" ref="SideBar" @getAIoptions="getAIoptions"></SideBar>
+        <List :current="current" ref="List" @ListCHangeStatus="ListCHangeStatus" @chooseRoom="chooseRoom"></List>
+        <chatRoom :options="options" @updateList="updateList" v-if="!AI"></chatRoom>
+        <AIRoom :options="AIoptions" v-if="AI"></AIRoom>
     </div>
 </template>
 
@@ -13,11 +14,14 @@
 import SideBar from './components/sidebar.vue'
 import List from './components/list.vue'
 import chatRoom from './components/chatRoom.vue'
+import AIRoom from './components/AIRoom.vue'
+import { getConversationInfo } from '@/api/bing';
 export default {
     components: {
         SideBar,
         List,
-        chatRoom
+        chatRoom,
+        AIRoom
     },
     created() {
         const { ipcRenderer } = window.require('electron');
@@ -33,10 +37,19 @@ export default {
             socket: "",
             pc: "",
             receiver: "",
-            options: ""
+            options: "",
+            /**
+             * bing相关参数
+             */
+            AI: false,
+            AIoptions: {
+                room: ""
+            }
         };
     },
-
+    created() {
+        this.getBingData()
+    },
     methods: {
         //改变侧边栏选项
         changeStatus(tag) {
@@ -47,10 +60,32 @@ export default {
             this.$refs.SideBar.changeStatus(tag)
         },
         chooseRoom(item) {
-            this.options = item
+            if (item.AI) {
+                if (!this.AIoptions.room) {
+                    return this.$message.warning("你无法进行AI对话,请前往设置中生成")
+                }
+                this.AI = true
+            } else {
+                this.AI = false
+                this.options = item
+            }
         },
-        updateList(){
+        updateList() {
             this.$refs.List.loadListData()
+        },
+        /**
+         * bing相关方法
+         */
+        getBingData() {
+            getConversationInfo()
+                .then((res) => {
+                    if (res.data.total != 0) {
+                        this.getAIoptions(res.data);
+                    }
+                })
+        },
+        getAIoptions(AIoptions) {
+            this.AIoptions = AIoptions
         }
 
     },

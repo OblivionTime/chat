@@ -16,7 +16,10 @@ import {
 	removeToken,
 	getIPaddress,
 	setIPaddress,
-	removeIPaddress
+	removeIPaddress,
+	getProxyaddress,
+	setProxyaddress,
+	removeProxyaddress
 
 } from '@/utils/cookie';
 const user = {
@@ -24,6 +27,7 @@ const user = {
 		token: getToken() ? getToken() : '',
 		userInfo: getUser() ? getUser() : '',
 		ipaddress: getIPaddress() ? getIPaddress() : 'https://127.0.0.1:8888',
+		proxyaddress: getProxyaddress() ? getProxyaddress() : '',
 	},
 
 	mutations: {
@@ -35,6 +39,9 @@ const user = {
 		},
 		SET_IPADDRESS: (state, ipaddress) => {
 			state.ipaddress = ipaddress
+		},
+		SET_PROXYADDRESS: (state, proxyaddress) => {
+			state.proxyaddress = proxyaddress
 		},
 	},
 	actions: {
@@ -84,11 +91,13 @@ const user = {
 			setUser(userInfo)
 		},
 		//修改服务器地址
-		updateIPAddress({
+		updateAddress({
 			commit
-		}, ipaddress) {
+		}, { ipaddress, proxyaddress }) {
 			commit('SET_IPADDRESS', ipaddress)
+			commit('SET_PROXYADDRESS', proxyaddress)
 			setIPaddress(ipaddress)
+			setProxyaddress(proxyaddress)
 		},
 	}
 }

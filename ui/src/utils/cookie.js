@@ -11,6 +11,7 @@ import Cookies from 'js-cookie'
 const TokenKey = 'Authorization'
 const NameKey = 'user'
 const IPAddressKey = 'ipaddress'
+const ProxyAddressKey = 'proxyaddress'
 
 export function getToken() {
   return localStorage.getItem(TokenKey)
@@ -47,4 +48,16 @@ export function setIPaddress(ipaddress) {
 
 export function removeIPaddress() {
   return localStorage.removeItem(IPAddressKey)
+}
+
+export function getProxyaddress() {
+  return localStorage.getItem(ProxyAddressKey)
+}
+
+export function setProxyaddress(proxyaddress) {
+  return localStorage.setItem(ProxyAddressKey, proxyaddress)
+}
+
+export function removeProxyaddress() {
+  return localStorage.removeItem(ProxyAddressKey)
 }

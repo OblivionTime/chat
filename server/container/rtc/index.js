@@ -4,7 +4,7 @@ module.exports = {
 const path = require('path');
 
 let { RespParamErr, RespServerErr, RespExitFriendErr, RespUpdateErr, RespCreateErr } = require('../../model/error');
-const { RespError, RespSucess, RespData } = require('../../model/resp');
+const { RespError, RespSuccess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
 const fs = require('fs');
 const { generateRandomString, notExitCreate } = require('../../utils/utils')

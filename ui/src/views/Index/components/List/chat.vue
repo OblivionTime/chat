@@ -49,7 +49,14 @@ export default {
         loadData() {
             getMessageList()
                 .then((res) => {
-                    let ChatList = []
+                    let ChatList = [{
+                        avatar: require('@/assets/chat/Bing.svg'),
+                        lastMessage: "",
+                        name: "必应",
+                        unreadCount: 0,
+                        updated_at: "now",
+                        AI: true,
+                    }]
                     for (const item of res.data) {
                         item.updated_at = toggleTime2(item.updated_at)
                         ChatList.push(item)

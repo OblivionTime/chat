@@ -42,11 +42,13 @@ let friendRouter = require('./routes/friend')();
 let groupRouter = require('./routes/group')();
 let messageRouter = require('./routes/message')();
 let rtcRouter = require('./routes/rtc')();
+let bingRouter = require('./routes/bing')();
 
 app.use('/api/chat/v1/auth', cors, indexRouter);
 app.use('/api/chat/v1/friend', cors, friendRouter);
 app.use('/api/chat/v1/group', cors, groupRouter);
 app.use('/api/chat/v1/message', cors, messageRouter);
 app.use('/api/chat/v1/rtc', cors, rtcRouter);
+app.use('/api/chat/v1/bing', cors, bingRouter);
 
 module.exports = app

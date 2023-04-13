@@ -51,7 +51,8 @@ function initUserTable() {
         if (error) return console.log(error);
         initGroupTable()
         initMessageTable()
-
+        initAIConversation()
+        initAIMessageTable()
     });
 }
 //创建firend表
@@ -171,6 +172,54 @@ function initmessageStatisticsTable() {
       )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `
     db.query(sql, (error, results, fields) => {
+        if (error) return console.log(error);
+    });
+}
+/**
+ * new bing相关表
+ */
+//创建AI消息存储表
+function initAIMessageTable() {
+    const sql = `
+    CREATE TABLE IF NOT EXISTS  ai_message (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        sender_id int(11) NOT NULL,
+        receiver_id int(11) NOT NULL,
+        content longtext NOT NULL,
+        link_list json DEFAULT NULL,
+        room  VARCHAR(255) NOT NULL,
+        conversation_id  VARCHAR(255) NOT NULL,
+        conversation_signature VARCHAR(255) NOT NULL,
+        client_id VARCHAR(255) NOT NULL,
+        invocation_id int(11) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id)
+      )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `
+    db.query(sql, (error, results, fields) => {
+        initmessageStatisticsTable()
+        if (error) return console.log(error);
+    });
+}
+//创建conversation存储表
+function initAIConversation() {
+    const sql = `
+    CREATE TABLE IF NOT EXISTS  ai_conversation (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        username VARCHAR ( 255 ) NOT NULL,
+        room  VARCHAR(255) NOT NULL,
+        conversation_id  VARCHAR(255) NOT NULL,
+        conversation_signature VARCHAR(255) NOT NULL,
+        client_id VARCHAR(255) NOT NULL,
+        count int(11) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        FOREIGN KEY (username) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE
+      )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `
+    db.query(sql, (error, results, fields) => {
+        initmessageStatisticsTable()
         if (error) return console.log(error);
     });
 }

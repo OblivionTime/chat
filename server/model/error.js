@@ -10,6 +10,8 @@ exports.RespUpdateErr = 4005
 exports.RespExitFriendErr = 4006
 exports.RespCreateErr = 4007
 exports.RespExitGroupErr = 4008
+exports.RespBingNotLogin = 4009
+exports.RespBingErrorProxy = 4010
 exports.RespServerErr = 5000
 
 exports.RespMap = {

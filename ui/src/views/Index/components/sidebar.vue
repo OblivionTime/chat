@@ -19,7 +19,7 @@
                 @click.stop="showMenu = true" :style="showMenu ? 'background-color: #eee;' : ''">
             <div class="sidebar-menu-items" v-if="showMenu">
                 <div class="sidebar-menu-item" @click="openBindDialog">二维码绑定</div>
-                <div class="sidebar-menu-item">设置</div>
+                <div class="sidebar-menu-item" @click="openSettingsDialog">设置</div>
                 <div class="sidebar-menu-item" @click="logout">退出</div>
             </div>
         </div>
@@ -64,6 +64,7 @@
                     :class="phoneFlag ? 'info-btn-disabled' : ''">修改密码</button>
             </div>
         </el-dialog>
+       <Settings @getBingInfo="getBingInfo" ref="Settings"></Settings>
     </div>
 </template>
 
@@ -71,10 +72,11 @@
 import vueQr from "vue-qr";
 import { UserUpdateInfo, UserUpdatePassword } from '@/api/auth';
 import { mapActions } from "vuex";
-import { userInfo } from "os";
+import Settings from '@/components/settings'
 export default {
     components: {
-        vueQr
+        vueQr,
+        Settings
     },
     data() {
         return {
@@ -95,7 +97,11 @@ export default {
              */
             showBindDialog: false,
             logo: require("@/assets/logo.png"),
-            text: "http://192.168.6.36:9999/#/code"
+            text: "http://192.168.6.36:9999/#/code",
+            /**
+             * 设置
+             */
+            showSettingsDialog: true
         };
     },
     mounted() {
@@ -104,13 +110,13 @@ export default {
         this.text = `http://${prefix}/#/code?username=${username}`
         this.userInfo = this.$store.getters.userInfo
         let avatar = this.getPath(this.userInfo.avatar) ? this.getPath(this.userInfo.avatar) : require("@/assets/logo.png")
-        this.photo =avatar
+        this.photo = avatar
         if (this.$store.getters.userInfo.phone) {
             this.phoneFlag = false
         }
     },
     methods: {
-        ...mapActions(["updateUserInfo", "Logout"]),
+        ...mapActions(["updateUserInfo", "Logout","updateAddress"]),
         //修改状态
         changeStatus(tag) {
             this.current = tag
@@ -123,6 +129,16 @@ export default {
         //二维码绑定
         openBindDialog() {
             this.showBindDialog = true
+        },
+        /**
+         * 设置相关
+         */
+        //获取bing相关配置
+        getBingInfo(options){
+            this.$emit('getAIoptions', options);
+        },
+        openSettingsDialog(){
+            this.$refs.Settings.openDialog()
         },
         //退出登录
         logout() {
@@ -406,6 +422,7 @@ export default {
         background-color: #c8c9cc;
     }
 }
+
 
 ::v-deep .info-dialog {
     padding-bottom: 20px;
