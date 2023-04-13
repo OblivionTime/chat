@@ -23,10 +23,7 @@ export default {
         chatRoom,
         AIRoom
     },
-    created() {
-        const { ipcRenderer } = window.require('electron');
-        ipcRenderer.send('resize-window', { width: 1000, height: 600 });
-    },
+
     data() {
         return {
             search: "",
@@ -48,6 +45,8 @@ export default {
         };
     },
     created() {
+        const { ipcRenderer } = window.require('electron');
+        ipcRenderer.send('resize-window', { width: 1000, height: 600 });
         this.getBingData()
     },
     methods: {
