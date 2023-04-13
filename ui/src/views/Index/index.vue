@@ -26,6 +26,7 @@ export default {
     created() {
         const { ipcRenderer } = window.require('electron');
         ipcRenderer.send('resize-window', { width: 1000, height: 600 });
+        this.getBingData()
     },
     data() {
         return {
@@ -46,9 +47,6 @@ export default {
                 room: ""
             }
         };
-    },
-    created() {
-        this.getBingData()
     },
     methods: {
         //改变侧边栏选项
