@@ -5,7 +5,6 @@ node_modules
 uploads
 dist
 *.zip
-*.exe
 # local env files
 .env.local
 .env.*.local
