@@ -1,5 +1,5 @@
 <template>
-    <div class="container" @click="showAdd = false">
+    <div class="container">
         <SideBar @changeStatus="changeStatus" ref="SideBar" @getAIoptions="getAIoptions"></SideBar>
         <List :current="current" ref="List" @ListCHangeStatus="ListCHangeStatus" @chooseRoom="chooseRoom"></List>
         <chatRoom :options="options" @updateList="updateList" v-if="!AI"></chatRoom>
@@ -16,6 +16,8 @@ import List from './components/list.vue'
 import chatRoom from './components/chatRoom.vue'
 import AIRoom from './components/AIRoom.vue'
 import { getConversationInfo } from '@/api/bing';
+const remote = window.require('electron').remote;
+const win = remote.getCurrentWindow();
 export default {
     components: {
         SideBar,
@@ -26,14 +28,17 @@ export default {
 
     data() {
         return {
-            search: "",
-            showAdd: false,
-            current: "chat",
-            activeName: "chat",
-
+            /**
+             * 通信相关
+             */
             socket: "",
-            pc: "",
-            receiver: "",
+            /**
+             * 侧边栏相关参数
+             */
+            current: "chat",
+            /**
+             * 聊天框相关参数
+             */
             options: "",
             /**
              * bing相关参数
@@ -48,8 +53,31 @@ export default {
         const { ipcRenderer } = window.require('electron');
         ipcRenderer.send('resize-window', { width: 1000, height: 600 });
         this.getBingData()
+        //检测窗口关闭,自动挂断电话
+        win.on('close', (event) => {
+            if (this.socket) {
+                this.socket.close()
+            }
+        });
+        this.initSocket()
     },
     methods: {
+        /**
+         * 通信相关
+         */
+        initSocket() {
+            this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/auth/user_channel?username=${this.$store.getters.userInfo.username}`)
+            this.socket.onmessage = (message) => {
+                let data = JSON.parse(message.data)
+                switch (data.name) {
+                    case "friend":
+                    case "list":
+                        //重新加载消息列表
+                        this.updateList()
+                        break
+                }
+            }
+        },
         //改变侧边栏选项
         changeStatus(tag) {
             this.current = tag
@@ -88,7 +116,12 @@ export default {
         }
 
     },
-
+    destroyed() {
+        if (this.socket) {
+            this.socket.close()
+            this.socket = null
+        }
+    },
 }
 </script>
 <style lang="scss" scoped>

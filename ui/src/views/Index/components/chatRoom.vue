@@ -1,6 +1,5 @@
 <template>
-    <div class="chat-container" @click="showEmoji = false" v-loading.fullscreen.lock="fullscreenLoading"
-        :style="containerAni">
+    <div class="chat-container" @click="showEmoji = false" :style="containerAni">
         <div class="header">
             <div class="header-top">
                 <div class="header-left">
@@ -26,8 +25,8 @@
             <div class="chat-content" ref="record">
                 <div :class="item.sender_id == sender_id ? 'self' : 'other'" v-for="item, index in chatList" :key="index">
                     <div class="avatar" :class="'avatar-' + item.type">
-                        <img :src="item.avatar ? getPath(item.avatar) : require('@/assets/logo.png')" alt="" srcset="" width="45px"
-                            height="45px">
+                        <img :src="item.avatar ? getPath(item.avatar) : require('@/assets/logo.png')" alt="" srcset=""
+                            width="45px" height="45px">
                     </div>
                     <div class="aChat" style="white-space: pre-wrap;" :class="item.type">
                         <div v-if="item.type == 'text'">
@@ -51,7 +50,7 @@
                     </div>
                 </div>
             </div>
-            <div class="send-message">
+            <div class="send-message" id="message">
                 <div class="send-message-header">
                     <img src="../../../assets/chat/icon.png" alt="" @click.stop="showEmoji = !showEmoji">
                     <img src="../../../assets/chat/photo.png" alt="" @click="choosePhoto">
@@ -129,7 +128,6 @@ export default {
             avatar: "",
             content: "",
             chatList: [],
-            fullscreenLoading: false,
             /**
              * 表情包
              * */
@@ -215,6 +213,12 @@ export default {
                 } else {
                     this.chatList.push(data)
                 }
+                setTimeout(() => {
+                    this.$nextTick(() => {
+                        this.$refs.record.scrollTop = this.$refs.record.scrollHeight;
+                    })
+                }, 50);
+
             }
             this.socket.onclose = () => {
                 console.log("连接关闭");
@@ -286,27 +290,58 @@ export default {
             choose.click()
         },
         //发送文件
-        SendFile(e) {
+        async SendFile(e) {
             if (e.target.files.length > 0) {
-                this.fullscreenLoading = true
+                const loading = this.$loading({
+                    target: document.getElementById("message"),
+                    lock: true,
+                    text: '文件上传中...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
                 var file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const fileContent = event.target.result;
-                    const content = new Uint8Array(fileContent);
-                    let filename = file.name
-                    this.socket.send(JSON.stringify({
-                        "filename": filename,
-                        "sender_id": this.sender_id,
-                        "receiver_id": this.receiver_id,
-                        "content": Array.from(content),
-                        "avatar": this.avatar,
-                        "room": this.room,
-                        "type": getFileSuffix2(filename)
-                    }))
-                    this.fullscreenLoading = false
+                // 发送文件信息
+                const fileInfo = {
+                    fileName: file.name,
+                    fileSize: file.size
                 };
-                reader.readAsArrayBuffer(file);
+                //发送文件下载指令
+                this.socket.send(JSON.stringify({
+                    "filename": file.name,
+                    "sender_id": this.sender_id,
+                    "receiver_id": this.receiver_id,
+                    "content": "",
+                    "avatar": this.avatar,
+                    "room": this.room,
+                    "type": getFileSuffix2(file.name),
+                    "fileType": "start",
+                    "fileInfo": JSON.stringify(fileInfo)
+                }))
+                //防止文件未初始化
+                setTimeout(async () => {
+                    //开启读取文件并上传
+                    const reader = file.stream().getReader();
+                    let offset = 0;
+                    let tt = 0
+                    let chunk
+                    while (true) {
+                        chunk = await reader.read()
+                        if (chunk.done) {
+                            loading.close()
+                            return
+                        }
+                        this.socket.send(JSON.stringify({
+                            "filename": file.name,
+                            "sender_id": this.sender_id,
+                            "receiver_id": this.receiver_id,
+                            "content": Array.from(new Uint8Array(chunk.value)),
+                            "avatar": this.avatar,
+                            "room": this.room,
+                            "type": getFileSuffix2(file.name),
+                            "fileType": "upload",
+                        }))
+                    }
+                }, 50);
             }
         },
         //下载文件

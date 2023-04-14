@@ -4,7 +4,8 @@ module.exports = {
     Register,
     ForgetPassword,
     LoginCode,
-    updateInfo
+    updateInfo,
+    initUserNotification
 };
 const jwt = require('jsonwebtoken');
 const secretKey = 'xWbiNA3FqnK77MnVCj5CAcfA-VlXj7xoQLd1QaAme6l_t0Yp1TdHbSw';
@@ -266,4 +267,32 @@ function getUserInfo(username, callback) {
     })
 }
 
+/**
+ * 初始化用户的通知管道,接收一些对方的消息
+ */
+function initUserNotification(ws, req) {
+    //获取name
+    let url = req.url.split("?")[1];
+    let params = new URLSearchParams(url)
+    let username = params.get("username")
+    //如果用户已经登录则强制退出当前用户
+    if (LoginRooms[username]) {
+        ws.close()
+    }
+    LoginRooms[username] = ws
+    ws.on('message', function (Resp_data) {
+        let data = JSON.parse(Resp_data)
+        //接收者
+        let receiver_username = data.receiver_username
+        //对方在线
+        if (LoginRooms[receiver_username]) {
+            LoginRooms[receiver_username].send(Resp_data)
 
+        }
+    });
+    ws.on('close', function () {
+        if (LoginRooms[username]) {
+            delete LoginRooms[username]
+        }
+    })
+}

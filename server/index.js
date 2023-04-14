@@ -1,15 +1,8 @@
 /**
- * 初始化数据库
+ * 初始化所有的全局变量和全局方法
  */
-const db = require("./db/db.js")
-global.db = db
-/** 
-* 初始化状态码并设置为全局变量 
-*/
-const resp = require("./model/resp.js")
-global.RespSuccess = resp.RespSuccess
-global.RespError = resp.RespError
-global.RespData = resp.RespData
+const initGlobal = require('./global');
+initGlobal()
 /**
  * 初始化路由
  */
@@ -19,9 +12,10 @@ var app = require('./app/app');
  * 读取https证书文件
  */
 let fs = require("fs");
+const path = require('path');
 const httpsOption = {
-    key: fs.readFileSync('./mkcert/server.key'),
-    cert: fs.readFileSync('./mkcert/server.crt')
+    key: fs.readFileSync(path.join(__dirname, 'mkcert/server.key')),
+    cert: fs.readFileSync(path.join(__dirname, '/mkcert/server.crt'))
 }
 /**
  * 初始化https

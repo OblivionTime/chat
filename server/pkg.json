@@ -1,0 +1,19 @@
+{
+    "pkg": {
+        "targets": [
+            "node14-win-x64"
+        ],
+        "outputPath": "dist/release/win/",
+        "assets": [
+            "node_modules/node-pty/**",
+            "./mkcert/**",
+            "./bin/**"
+        ]
+    },
+    "pkg_fetch_version": "5.8.0",
+    "node_version": "v14.16.1",
+    "pkg_cache_path": "pkg_cache",
+    "name": "chat",
+    "version": "1.0.0",
+    "bin": "index.js"
+}

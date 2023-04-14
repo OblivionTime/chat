@@ -53,6 +53,7 @@ function initUserTable() {
         initMessageTable()
         initAIConversation()
         initAIMessageTable()
+        // initMessageNotify()
     });
 }
 //创建firend表
@@ -148,6 +149,7 @@ function initMessageTable() {
         room  VARCHAR(255) NOT NULL,
         type enum('private','group') NOT NULL,
         media_type enum('text','image','video','file') NOT NULL,
+        file_size int(11) NULL DEFAULT 0,
         status int(1) NOT NULL DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
@@ -175,6 +177,24 @@ function initmessageStatisticsTable() {
         if (error) return console.log(error);
     });
 }
+// //创建通知表
+// function initMessageNotify() {
+//     const sql = `
+//     CREATE TABLE IF NOT EXISTS  message_notify (
+//         id int(11) NOT NULL AUTO_INCREMENT,
+//         sender_username VARCHAR(255) NOT NULL,
+//         receiver_username VARCHAR(255) NOT NULL,
+//         content json NOT NULL,
+//         type enum('new','video','audio') NOT NULL,
+//         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+//         PRIMARY KEY (id),
+//         FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
+//       )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+//     `
+//     db.query(sql, (error, results, fields) => {
+//         if (error) return console.log(error);
+//     });
+// }
 /**
  * new bing相关表
  */
@@ -197,7 +217,6 @@ function initAIMessageTable() {
       )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `
     db.query(sql, (error, results, fields) => {
-        initmessageStatisticsTable()
         if (error) return console.log(error);
     });
 }
@@ -219,7 +238,6 @@ function initAIConversation() {
       )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `
     db.query(sql, (error, results, fields) => {
-        initmessageStatisticsTable()
         if (error) return console.log(error);
     });
 }

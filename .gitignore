@@ -1,7 +1,9 @@
 .DS_Store
 node_modules
 /build
-
+/release
+uploads
+dist
 *.zip
 *.exe
 # local env files
