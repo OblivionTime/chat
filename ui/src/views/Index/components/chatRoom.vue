@@ -145,7 +145,21 @@ export default {
     },
     created() {
         this.sendType = localStorage.getItem('sendType') ? localStorage.getItem('sendType') : 'enter'
-
+        this.containerAni = 'opacity:0'
+        this.empty = false
+        this.sender_id = this.$store.getters.userInfo.id
+        this.username = this.$store.getters.userInfo.username
+        this.avatar = this.$store.getters.userInfo.avatar
+        this.room = this.options.room
+        this.receiver_id = this.options.user_id
+        this.name = this.options.name
+        this.initSocket()
+        this.initRTCSocket()
+        this.chatList = []
+        setTimeout(() => {
+            this.containerAni = 'opacity:1'
+            this.empty = false
+        }, 100);
     },
     watch: {
         options(newOptions, oldOptions) {

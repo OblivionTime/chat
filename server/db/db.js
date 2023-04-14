@@ -32,9 +32,7 @@ const db = mysql.createPool({
 })
 //创建user表
 function initUserTable() {
-    let sql = `CREATE TABLE
-    IF
-        NOT EXISTS USER (
+    let sql = `CREATE TABLE   IF NOT EXISTS  user (
             id INT ( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR ( 255 ) NOT NULL UNIQUE,
             password VARCHAR ( 255 ) NOT NULL,

@@ -98,7 +98,6 @@ async function SingleRTCConnect(ws, req) {
     ws.on('close', () => {
         rooms[room][username] = ""
     })
-
 }
 //发送给其他人
 function BroadcastSocket(username, room, data) {

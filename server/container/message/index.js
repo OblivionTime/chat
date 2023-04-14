@@ -23,7 +23,7 @@ async function List(req, res) {
     let data = []
     let id = req.user.id
     //获取所有好友聊天列表
-    let sql = `SELECT user_id,avatar,remark as name,f.room,msg_sta.updated_at from friend as f,(SELECT id FROM friend_group WHERE user_id=? LIMIT 1) as fp,message_statistics as msg_sta WHERE fp.id=f.group_id and f.room=msg_sta.room  GROUP BY msg_sta.updated_at DESC;`
+    let sql = `SELECT user_id,avatar,remark as name,f.room,msg_sta.updated_at from friend as f,(SELECT id FROM friend_group WHERE user_id=? LIMIT 1) as fp,message_statistics as msg_sta WHERE fp.id=f.group_id and f.room=msg_sta.room  ORDER BY msg_sta.updated_at DESC;`
     let { err, results } = await Query(sql, [id])
     for (const index in results) {
         let item = results[index]
@@ -42,7 +42,7 @@ async function List(req, res) {
     // 查询数据失败
     if (err) return RespError(res, RespServerErr)
     //获取所有群聊聊天列表
-    sql = 'SELECT avatar,name,gc.room,msg_sta.updated_at FROM group_chat as gc,(SELECT * FROM group_members WHERE user_id=?) as gm,message_statistics as msg_sta  WHERE gc.id=gm.group_id and gc.room=msg_sta.room  GROUP BY msg_sta.updated_at DESC;'
+    sql = 'SELECT avatar,name,gc.room,msg_sta.updated_at FROM group_chat as gc,(SELECT * FROM group_members WHERE user_id=?) as gm,message_statistics as msg_sta  WHERE gc.id=gm.group_id and gc.room=msg_sta.room  ORDER BY msg_sta.updated_at DESC;'
     let resObj = await Query(sql, [id])
     // 查询数据失败
     if (resObj.err) return RespError(res, RespServerErr)
