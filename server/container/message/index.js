@@ -9,6 +9,7 @@ const { RespError, RespSuccess, RespData } = require('../../model/resp');
 const { Query } = require('../../db/query');
 const fs = require('fs');
 const { generateRandomString, notExitCreate } = require('../../utils/utils')
+const { formatBytes } = require('../../utils/format')
 let rooms = {}
 /**
  * 获取消息列表
@@ -93,6 +94,7 @@ async function SingleConnect(ws, req) {
             "room": item.room,
             "avatar": item.avatar,
             "type": item.media_type,
+            file_size: formatBytes(item.file_size),
             "created_at": new Date(item.created_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
         }
     })
@@ -100,9 +102,13 @@ async function SingleConnect(ws, req) {
     //将所有未读消息变成已读
     sql = 'update message set status=1 where receiver_id=? and room=? and type=? and status=0'
     await Query(sql, [id, room, "private"])
+    let fileInfo = null;
+    let receivedSize = 0;
+    let writeStream = null;
     ws.on('message', async (Resp_data) => {
         let message = JSON.parse(Resp_data)
         let fileContent, fileSuffix, filename
+
         //判断其类型
         let msg = {
             sender_id: message.sender_id,
@@ -110,6 +116,7 @@ async function SingleConnect(ws, req) {
             type: 'private',
             media_type: message.type,
             room: room,
+            file_size: 0,
         }
         switch (message.type) {
             case 'text':
@@ -121,8 +128,8 @@ async function SingleConnect(ws, req) {
                     .substring(message.filename.lastIndexOf(".") + 1)
                     .toLowerCase();
                 filename = generateRandomString(32) + "." + fileSuffix
-                notExitCreate(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/images`))
-                fs.writeFileSync(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/images/${filename}`), fileContent)
+                notExitCreate(path.join(process.cwd(), `uploads/message/${room.replace(/-/g, "_")}/images`))
+                fs.writeFileSync(path.join(process.cwd(), `uploads/message/${room.replace(/-/g, "_")}/images/${filename}`), fileContent)
                 msg.content = `/uploads/message/${room.replace(/-/g, "_")}/images/${filename}`
                 message.content = `/uploads/message/${room.replace(/-/g, "_")}/images/${filename}`
                 break
@@ -132,17 +139,47 @@ async function SingleConnect(ws, req) {
                     .substring(message.filename.lastIndexOf(".") + 1)
                     .toLowerCase();
                 filename = generateRandomString(32) + "." + fileSuffix
-                notExitCreate(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/video`))
-                fs.writeFileSync(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/video/${filename}`), fileContent)
+                notExitCreate(path.join(process.cwd(), `uploads/message/${room.replace(/-/g, "_")}/video`))
+                fs.writeFileSync(path.join(process.cwd(), `uploads/message/${room.replace(/-/g, "_")}/video/${filename}`), fileContent)
                 msg.content = `/uploads/message/${room.replace(/-/g, "_")}/video/${filename}`
                 message.content = `/uploads/message/${room.replace(/-/g, "_")}/video/${filename}`
                 break
             case 'file':
-                fileContent = Buffer.from(message.content)
-                notExitCreate(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/file`))
-                fs.writeFileSync(path.join(__dirname, `../../uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`), fileContent)
-                msg.content = `/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
-                message.content = `/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
+                if (message.fileType == 'start') {
+                    receivedSize = 0;
+                    fileInfo = JSON.parse(message.fileInfo)
+                    notExitCreate(path.join(process.cwd(), `uploads/message/${room.replace(/-/g, "_")}/file`))
+                    writeStream = fs.createWriteStream(path.join(process.cwd(), `uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`));
+                    return
+                } else if (message.fileType == 'upload') {
+                    fileContent = Buffer.from(message.content)
+                    // 接收文件块并写入文件
+                    writeStream.write(fileContent);
+                    receivedSize += fileContent.length;
+                    // 如果接收完整个文件，则关闭文件流并发送上传成功消息
+                    if (receivedSize === fileInfo.fileSize) {
+                        writeStream.end(async () => {
+                            msg.content = `/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
+                            msg.file_size = receivedSize
+                            message.content = `/uploads/message/${room.replace(/-/g, "_")}/file/${message.filename}`
+                            if (rooms[room][message.receiver_id]) {
+                                msg.status = 1
+                            } else {
+                                msg.status = 0
+                            }
+
+                            sql = 'insert into message set ?'
+                            await Query(sql, msg)
+                            sql = `update  message_statistics set total=total+1  where room=?`
+                            await Query(sql, [room])
+                            for (const key in rooms[room]) {
+                                rooms[room][key].send(JSON.stringify(message))
+                            }
+                            return
+                        });
+                    }
+                    return
+                }
                 break
         }
         if (rooms[room][message.receiver_id]) {
@@ -156,6 +193,7 @@ async function SingleConnect(ws, req) {
         await Query(sql, [room])
         for (const key in rooms[room]) {
             rooms[room][key].send(JSON.stringify(message))
+            NotificationUser({ receiver_id: message.receiver_id, name: "list" })
         }
     })
 }

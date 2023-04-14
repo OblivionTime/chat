@@ -2,8 +2,22 @@
     <div class="contact-list">
         <el-tabs v-model="activeName" stretch>
             <el-tab-pane label="好友" name="chat">
+
                 <div style=" width: 100%;
-                height: calc(100vh - 120px);overflow: auto;">
+                height: calc(100vh - 120px);overflow: auto;" class="contact">
+                    <!-- <div class="contact-headers">新的朋友</div>
+                    <div class="contact-new">
+                        <div class="contact-new-avatar">
+                            <img :src="require('@/assets/list/news.png')" alt="" width="40" height="40"
+                                style="object-fit: cover;">
+                        </div>
+                        <div class="contact-new-info">
+                            新的朋友
+                        </div>
+                    </div> -->
+
+                    <!-- <div style="width: 100%;height: 1px;background-color: #eee;"></div> -->
+                    <!-- <div class="contact-headers">联系人列表</div> -->
                     <el-tree :data="FriendList" :props="defaultProps">
                         <div slot-scope="{ node, data }">
                             <div v-if="data.children">
@@ -103,20 +117,48 @@ export default {
     width: 100%;
     height: calc(100vh - 70px);
 
-    .tree-item {
-        cursor: pointer;
-        padding: 5px 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        .tree-item-info {
-            white-space: nowrap;
+    .contact {
+        .contact-headers {
+            color: #999999;
+            font-size: 12px;
+            margin: 10px 0;
             margin-left: 10px;
-            width: 120px;
-            overflow: hidden;
+        }
+
+        .contact-new {
+            cursor: pointer;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+
+            .contact-new-info {
+                white-space: nowrap;
+                margin-left: 10px;
+                width: 120px;
+                overflow: hidden;
+            }
+
+            &:hover {
+                background-color: #eee;
+            }
+        }
+
+        .tree-item {
+            cursor: pointer;
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .tree-item-info {
+                white-space: nowrap;
+                margin-left: 10px;
+                width: 120px;
+                overflow: hidden;
+            }
         }
     }
+
 
     .group-tree-item {
         cursor: pointer;

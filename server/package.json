@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "serve": "node index.js",
-    "build": "yarn build:win && yarn build:mac && yarn build:linux",
-    "build:win": "nexe index.js -t windows-x64-14.15.3 -o ./dist/release/chat.exe -r ./mkcert/ ",
-    "build:mac": "nexe index.js -t mac-x64-14.15.3 -o ./dist/release/chat.exe ./mkcert/",
-    "build:linux": "nexe  index.js -t linux-x64-14.15.3 -o ./dist/release/chat ./mkcert/"
+    "build": "yarn build:win && yarn  build:mac && yarn build:linux",
+    "build:win": "pkg -c pkg.json  index.js",
+    "build:linux": "pkg -c pkg_linux.json  index.js ",
+    "build:mac": "pkg -c pkg_mac.json  index.js"
   },
   "author": "",
   "license": "ISC",

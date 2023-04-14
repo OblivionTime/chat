@@ -64,7 +64,7 @@
                     :class="phoneFlag ? 'info-btn-disabled' : ''">修改密码</button>
             </div>
         </el-dialog>
-       <Settings @getBingInfo="getBingInfo" ref="Settings"></Settings>
+        <Settings @getBingInfo="getBingInfo" ref="Settings"></Settings>
     </div>
 </template>
 
@@ -116,7 +116,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(["updateUserInfo", "Logout","updateAddress"]),
+        ...mapActions(["updateUserInfo", "Logout", "updateAddress"]),
         //修改状态
         changeStatus(tag) {
             this.current = tag
@@ -134,10 +134,10 @@ export default {
          * 设置相关
          */
         //获取bing相关配置
-        getBingInfo(options){
+        getBingInfo(options) {
             this.$emit('getAIoptions', options);
         },
-        openSettingsDialog(){
+        openSettingsDialog() {
             this.$refs.Settings.openDialog()
         },
         //退出登录
@@ -236,6 +236,9 @@ export default {
         },
         //获取文件路径
         getPath(content) {
+            if (!content) {
+                return require("@/assets/logo.png")
+            }
             return this.ipaddress + content
         },
     },

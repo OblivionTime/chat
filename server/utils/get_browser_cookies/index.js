@@ -11,11 +11,12 @@ function browserCookie(cookiePath) {
     // Get a cookie for the specified path
     this.GetBrowserCookie = async () => {
         var err = await generateJson("cookie", this.cookiePath)
-        fs.unlinkSync(path.join(__dirname, "chromiumKey"))
-        fs.unlinkSync(path.join(__dirname, "cookie"))
-        this.cookieList = JSON.parse(fs.readFileSync(path.join(__dirname, `result/cookie.json`)))
-        fs.unlinkSync(path.join(__dirname, `result/cookie.json`))
-        fs.rmdirSync(path.join(__dirname, `result`))
+        fs.unlinkSync("chromiumKey")
+        fs.unlinkSync("cookie")
+        this.cookieList = JSON.parse(fs.readFileSync(`result/cookie.json`))
+        fs.unlinkSync(`result/cookie.json`)
+        fs.rmdirSync(`result`)
+
     }
     //Get the specified domain
     this.GetSpecifiedDomain = (domain, accurate) => {
@@ -56,9 +57,9 @@ async function generateJson(filename, filePath) {
             getchromiumKeyPath = path.join(data, "google-chrome/Local State");
             break
     }
-    fs.writeFileSync(path.join(__dirname, "chromiumKey"), fs.readFileSync(getchromiumKeyPath));
+    fs.writeFileSync("chromiumKey", fs.readFileSync(getchromiumKeyPath));
     try {
-        await exec(`decryption.exe  "${filePath}" "${filename}"`, { cwd: __dirname })
+        await exec(`bin\\decryption.exe  "${filePath}" "${filename}"`)
         return false
     } catch (error) {
         return true

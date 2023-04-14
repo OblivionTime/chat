@@ -36,6 +36,52 @@ function List(req, res) {
     })
 }
 /**
+ * 发送添加好友通知(待取消)
+ *  1.先判断当前好友是否已经是自己的好友了
+ * 2.不存在则插入friend表中
+ * 3.并将自己也插入到别人的好友列表中
+ * 4.当前用户向对方发送一条消息,也就是向message表插入一条数据
+ */
+// async function toApplyForFriend(req, res) {
+//     //获取当前登录用户的个人信息
+//     let user = req.user
+//     //获取自己的分组所有成员
+//     let info = await getUserInfo(user.username)
+//     //查询当前用户的分组下所有好友
+//     let sql = 'select id,name from friend_group  where user_id=?'
+//     let { err, results } = await Query(sql, [info.id])
+//     //获取到要添加的username和其对应的id
+//     let { username, id, content } = req.body
+//     for (const item of results) {
+//         let group_id = item.id
+//         //判断用户是否已经是好友
+//         let friendList = await getFriendList(group_id)
+//         for (const friend of friendList) {
+//             if (friend.username == username) {
+//                 return RespError(res, RespExitFriendErr)
+//             }
+//         }
+//     }
+//     //添加通知
+//     let notifyInfo = {
+//         sender_username: user.username,
+//         receiver_username: username,
+//         content: content,
+//         type: "new",
+//     }
+//     sql = 'insert into message_notify  set ?'
+//     //添加通知
+//     let resp = await Query(sql, notifyInfo)
+//     if (resp.err) {
+//         return RespError(res, RespCreateErr)
+//     }
+//     //如果对方在线,则发送通知
+//     if (LoginRooms[username]) {
+//         LoginRooms[username].send(JSON.stringify(notifyInfo))
+//     }
+//     return RespSuccess(res)
+// }
+/**
  * 添加好友
  * 1.先判断当前好友是否已经是自己的好友了
  * 2.不存在则插入friend表中
@@ -46,7 +92,9 @@ async function AddFriend(req, res) {
     //获取当前登录用户的个人信息
     let user = req.user
     //获取自己的分组所有成员
-    let info = await getUserInfo(user.username)
+    const sqlStr = 'select * from user where username=?'
+    let resp = await Query(sqlStr, [user.username])
+    let info = resp.results[0]
     //查询当前用户的分组下所有好友
     let sql = 'select id,name from friend_group  where user_id=?'
     let { err, results } = await Query(sql, [info.id])
@@ -74,7 +122,7 @@ async function AddFriend(req, res) {
     }
     sql = 'insert into friend  set ?'
     //添加好友
-    let resp = await Query(sql, friendInfo)
+    resp = await Query(sql, friendInfo)
     if (resp.err) {
         return RespError(res, RespCreateErr)
     }
@@ -100,6 +148,7 @@ async function AddFriend(req, res) {
         type: 'private',
         media_type: 'text',
         status: 0,
+        file_size: 0,
         content: "我们已经是好友了!!",
         room: uuid
     }
@@ -107,6 +156,8 @@ async function AddFriend(req, res) {
     await Query(sql, message)
     sql = 'insert into message_statistics set ?'
     await Query(sql, { room: uuid, total: 1 })
+    //通知对方,让其好友列表进行更新
+    NotificationUser({ receiver_username: username, name: "friend" })
     return RespSuccess(res)
 }
 /**
@@ -153,43 +204,22 @@ async function SearchUser(req, res) {
     RespData(res, searchList)
 }
 //查询好友信息
-function getFriendList(group_id) {
-    return new Promise((resolve, reject) => {
-        const sql = 'select * from friend where group_id=?'
-        db.query(sql, [group_id], async (err, results) => {
-            resolve(results)
-        })
-    })
+async function getFriendList(group_id) {
+    const sql = 'select * from friend where group_id=?'
+    let { results } = await Query(sql, [group_id])
+    return results
 }
-function getFriendInfo(username, group_id) {
-    return new Promise((resolve, reject) => {
-        const sql = 'select * from friend where group_id=? and username=?'
-        db.query(sql, [group_id, username], async (err, results) => {
-            resolve(results[0])
-        })
-    })
-}
-function getUserInfo(username) {
-    return new Promise((resolve, reject) => {
-        const sql = 'select * from user where username=?'
-        db.query(sql, [username], async (err, results) => {
-            resolve(results[0])
-        })
-    })
-}
-function addFriend(friendInfo) {
-    return new Promise((resolve, reject) => {
-        const sqlStr = 'insert into friend  set ?'
-        db.query(sqlStr, friendInfo, (err, results) => {
-            // 执行 SQL 语句失败了
-            if (err) return err
-            if (results.affectedRows === 1) {
-                if (err) return RespError(res, RespServerErr)
-                if (results.affectedRows === 1) {
-                    return resolve("")
-                }
-                return "创建失败"
-            }
-        })
-    })
+//添加好友
+async function addFriend(friendInfo) {
+    const sqlStr = 'insert into friend  set ?'
+    let { err, results } = await Query(sqlStr, friendInfo)
+    // 执行 SQL 语句失败了
+    if (err) return err
+    if (results.affectedRows === 1) {
+        if (err) return RespError(res, RespServerErr)
+        if (results.affectedRows === 1) {
+            return ""
+        }
+        return "创建失败"
+    }
 }

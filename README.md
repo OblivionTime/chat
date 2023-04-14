@@ -6,11 +6,42 @@
 **希望观众老爷给个免费的三连支持一下新人up主**
 # ♻️项目基本介绍
 `翎`是基于`electron(vue2)`和`nodejs`实现的简单聊天软件,其中用`websocket`和`http`进行通讯传递,数据库使用了`mysql`数据库,该项目功能简单,界面简洁,适合正在练习`websocket`和`vue`的小白查看代码,代码量极少且逻辑清晰,每个功能都会添加相应的逻辑供大家观看学习(大佬勿喷)
+# 🧨 部分用户遇到的问题
+## 数据库无法连接
+![在这里插入图片描述](https://img-blog.csdnimg.cn/f0ffa8532bb84153b8b0033b31d16a41.png)
+### 问题分析
+可能用户新装的mysql,没有设置数据库访问权限
+### 问题解决方案
+1. 进入到你的数据库
+```shell
+mysql -u root -p
+```
+2. 输入以下命令
+```shell
+use mysql;
+update user set Host="%" where User="root";
+flush privileges;
+exit;
+```
+3. 使用连接工具尝试连接mysql数据库(navicat)
+## 前端安装依赖出现问题(node-gyp)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/8aac61eee61a4a00b9b7451dbb4ab737.png)
+### 问题分析
+`electron`和nodejs版本不兼容,建议将nodejs版本修改为16.18或者14.20
+### 问题解决方案
+卸载当前版本的nodejs,然后安装`16.18`版本
+#### 16.18
+[https://nodejs.org/download/release/v16.18.0/node-v16.18.0-x64.msi](https://nodejs.org/download/release/v16.18.0/node-v16.18.0-x64.msi)
+#### 14.20
+[https://nodejs.org/download/release/v14.20.0/node-v14.20.0-x64.msi](https://nodejs.org/download/release/v14.20.0/node-v14.20.0-x64.msi)
 # 🧨项目目前存在的问题
 * 如果在同一台电脑上,进行视频通话,是不成功的,因为会出现摄像头也被占用问题,但是语音通话是可以的
 * 目前逻辑是必须双方都在同时相互聊天,才能进行语音和视频通话
 * 目前用户可以同时和不同的人同时进行音视频(后期会修改这个逻辑)
 * 目前视频通话存在画质模糊问题(待修复)
+# 🥑已修复的bug
+1. 文件下载出现了白屏
+2. 聊天框没有置底
 # 👻注意事项
 1. 打开软件第一时间修改服务器地址
 
@@ -263,6 +294,34 @@ Express-ws支持标准的WebSocket协议和Socket.IO协议，可以通过简单�
 * created_at: 记录创建时间，时间戳类型，默认值为当前时间戳。
 * updated_at: 记录更新时间，时间戳类型，默认值为当前时间戳，在记录更新时自动更新。
 该表没有定义外键约束和索引。
+## AI密钥存储表(ai_conversation)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c7085feca20c45d2aa5e86545a364856.png)
+
+
+* id: 主键，自动递增的整数。
+* username: 用户名，非空字符串。
+* room: 房间名称，非空字符串。
+* conversation_id: 会话 ID，非空字符串。
+* conversation_signature: 会话签名，非空字符串。
+* client_id: 客户端 ID，非空字符串。
+* count: 统计使用次数，默认值为 0。
+* created_at: 记录创建时间，默认值为当前时间戳。
+* updated_at: 记录更新时间，默认值为当前时间戳，在更新时自动更新。
+
+此外，该表还包含一个外键约束，它引用了 user 表中的 username 字段，并在删除或更新时级联操作。
+表使用 InnoDB 引擎，并使用 utf8mb4 字符集和 utf8mb4_unicode_ci 校对规则。
+## AI消息存储表(ai_conversation)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/10a9f89bc8b74ab28318028d1f27cb30.png)* id: 主键，自动递增的整数。
+* sender_id: 发送者 ID，非空整数。
+* receiver_id: 接收者 ID，非空整数。
+* content: 消息内容，非空长文本。
+* link_list: 链接列表，JSON 格式，默认值为 NULL。
+* room: 房间名称，非空字符串。
+* conversation_id: 会话 ID，非空字符串。
+* conversation_signature: 会话签名，非空字符串。
+* client_id: 客户端 ID，非空字符串。
+* invocation_id: 调用ID，非空整数。
+* created_at: 记录创建时间，默认值为当前时间戳。
 
 # 🔖项目运行
 ## 后端运行
