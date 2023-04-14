@@ -62,7 +62,7 @@ async function getConversationInfo(req, res) {
     let sql = "update ai_conversation set count=0 where username=? and TIMESTAMPDIFF(hour, updated_at, NOW()) >= 6"
     await Query(sql, [username])
     //获取到可聊天总数和已用次数
-    sql = "select count(*) as total,SUM(count) as us_count,room  from ai_conversation where username=?"
+    sql = "select count(*) as total,SUM(count) as us_count,room  from ai_conversation where username=? GROUP BY room"
     let { err, results } = await Query(sql, [username])
     // 查询数据失败
     if (err) return RespError(res, RespServerErr)

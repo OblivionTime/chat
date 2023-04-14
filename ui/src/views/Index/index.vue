@@ -85,6 +85,7 @@ export default {
         },
         ListCHangeStatus(tag) {
             this.$refs.SideBar.changeStatus(tag)
+            this.updateList()
         },
         chooseRoom(item) {
             if (item.AI) {
