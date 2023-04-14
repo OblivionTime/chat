@@ -24,16 +24,13 @@ flush privileges;
 exit;
 ```
 3. 使用连接工具尝试连接mysql数据库(navicat)
-## 前端安装依赖出现问题(node-gyp)
+## 后端安装依赖出现问题(node-gyp)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/8aac61eee61a4a00b9b7451dbb4ab737.png)
 ### 问题分析
-`electron`和nodejs版本不兼容,建议将nodejs版本修改为16.18或者14.20
+node-pty需要python依赖,这个只能根据错误去一个一个查找问题
 ### 问题解决方案
-卸载当前版本的nodejs,然后安装`16.18`版本
-#### 16.18
-[https://nodejs.org/download/release/v16.18.0/node-v16.18.0-x64.msi](https://nodejs.org/download/release/v16.18.0/node-v16.18.0-x64.msi)
-#### 14.20
-[https://nodejs.org/download/release/v14.20.0/node-v14.20.0-x64.msi](https://nodejs.org/download/release/v14.20.0/node-v14.20.0-x64.msi)
+错误可忽略,不影响程序运行
+
 # 🧨项目目前存在的问题
 * 如果在同一台电脑上,进行视频通话,是不成功的,因为会出现摄像头也被占用问题,但是语音通话是可以的
 * 目前逻辑是必须双方都在同时相互聊天,才能进行语音和视频通话
