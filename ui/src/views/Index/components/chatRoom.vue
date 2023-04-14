@@ -306,6 +306,26 @@ export default {
         //发送文件
         async SendFile(e) {
             if (e.target.files.length > 0) {
+                var file = e.target.files[0];
+                if (getFileSuffix2(file.name) != file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const fileContent = event.target.result;
+                        const content = new Uint8Array(fileContent);
+                        let filename = file.name
+                        this.socket.send(JSON.stringify({
+                            "filename": filename,
+                            "sender_id": this.sender_id,
+                            "receiver_id": this.receiver_id,
+                            "content": Array.from(content),
+                            "avatar": this.avatar,
+                            "room": this.room,
+                            "type": getFileSuffix2(filename)
+                        }))
+                    };
+                    reader.readAsArrayBuffer(file);
+                    return
+                }
                 const loading = this.$loading({
                     target: document.getElementById("message"),
                     lock: true,
@@ -313,7 +333,7 @@ export default {
                     spinner: 'el-icon-loading',
                     background: 'rgba(0, 0, 0, 0.7)'
                 });
-                var file = e.target.files[0];
+                
                 // 发送文件信息
                 const fileInfo = {
                     fileName: file.name,
