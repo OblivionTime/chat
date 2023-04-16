@@ -3,12 +3,12 @@
         <div class="header">
             <div class="header-top">
                 <div class="header-left">
-                    <img src="../../../assets/logo.png" alt="" width="15px">
+                    <img src="@/assets/logo.png" alt="" width="15px">
                 </div>
                 <div class="header-right">
-                    <img src="../../../assets/chat/minus.png" alt="" width="20px" class="header-icon" @click="minWindow">
-                    <img src="../../../assets/chat/max.png" alt="" width="12px" class="header-icon" @click="maxWindow">
-                    <img src="../../../assets/chat/close.png" alt="" width="20px" class="header-icon" @click="closeWindow">
+                    <img src="@/assets/chat/minus.png" alt="" width="20px" class="header-icon" @click="minWindow">
+                    <img src="@/assets/chat/max.png" alt="" width="12px" class="header-icon" @click="maxWindow">
+                    <img src="@/assets/chat/close.png" alt="" width="20px" class="header-icon" @click="closeWindow">
                 </div>
             </div>
             <div class="headder-bottom">

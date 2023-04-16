@@ -45,8 +45,8 @@
                 height: calc(100vh - 120px);overflow: auto;">
                     <div class="group-tree-item" v-for="item in groupList" :key="item.id">
                         <div class="group-tree-item-avatar">
-                            <img :src="item.avatar ? item.avatar : require('@/assets/logo.png')" alt="" width="40"
-                                height="40" style="object-fit: cover;">
+                            <img :src="item.avatar ? getAvatarPath(item.avatar) : require('@/assets/logo.png')" alt=""
+                                width="40" height="40" style="object-fit: cover;">
                         </div>
                         <div class="group-tree-item-info">
                             {{ item.name }} ({{ item.members.length + '/' + item.members.length }})
@@ -107,6 +107,13 @@ export default {
                         this.groupList = groupList
                     }
                 })
+        },
+        //获取头像地址
+        getAvatarPath(content) {
+            if (content.includes("upload")) {
+                return this.ipaddress + content
+            }
+            return content
         }
     },
 }

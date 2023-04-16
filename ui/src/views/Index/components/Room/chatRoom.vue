@@ -3,12 +3,12 @@
         <div class="header">
             <div class="header-top">
                 <div class="header-left">
-                    <img src="../../../assets/logo.png" alt="" width="15px">
+                    <img src="@/assets/logo.png" alt="" width="15px">
                 </div>
                 <div class="header-right">
-                    <img src="../../../assets/chat/minus.png" alt="" width="20px" class="header-icon" @click="minWindow">
-                    <img src="../../../assets/chat/max.png" alt="" width="12px" class="header-icon" @click="maxWindow">
-                    <img src="../../../assets/chat/close.png" alt="" width="20px" class="header-icon" @click="closeWindow">
+                    <img src="@/assets/chat/minus.png" alt="" width="20px" class="header-icon" @click="minWindow">
+                    <img src="@/assets/chat/max.png" alt="" width="12px" class="header-icon" @click="maxWindow">
+                    <img src="@/assets/chat/close.png" alt="" width="20px" class="header-icon" @click="closeWindow">
                 </div>
             </div>
             <div class="headder-bottom">
@@ -17,46 +17,52 @@
         </div>
 
         <div class="not-to-choose" v-if="empty">
-            <img src="../../../assets/logo.png" alt="" width="160">
+            <img src="@/assets/logo.png" alt="" width="160">
             <h3 style="margin-top: 40px;">何当有翅翎,飞去堕尔前！</h3>
             <span style="color: #838384;font-size: 13px;margin-top: 10px;">主动一点,世界会更大!</span>
         </div>
         <div class="content">
             <div class="chat-content" ref="record">
-                <div :class="item.sender_id == sender_id ? 'self' : 'other'" v-for="item, index in chatList" :key="index">
-                    <div class="avatar" :class="'avatar-' + item.type">
-                        <img :src="item.avatar ? getPath(item.avatar) : require('@/assets/logo.png')" alt="" srcset=""
-                            width="45px" height="45px">
-                    </div>
-                    <div class="aChat" style="white-space: pre-wrap;" :class="item.type">
-                        <div v-if="item.type == 'text'">
-                            {{ item.content }}
+
+                <div v-for="item, index in List" :key="index" class="chat-item">
+                    <span class="message-create-time">{{ item.sendTime }}</span>
+                    <div :class="item.sender_id == sender_id ? 'self' : 'other'">
+                        <div class="avatar" :class="'avatar-' + item.type">
+                            <img :src="item.avatar ? getPath(item.avatar) : require('@/assets/logo.png')" alt="" srcset=""
+                                width="45px" height="45px">
                         </div>
-                        <div v-else-if="item.type == 'image'">
-                            <el-image :src="getPath(item.content)" :alt="item.content"
-                                style="width: 200px;object-fit:contain" :preview-src-list="[getPath(item.content)]" />
-                        </div>
-                        <div v-else-if="item.type == 'video'">
-                            <video :src="getPath(item.content)" muted style="width: 300px;object-fit:cover"></video>
-                            <div class="play-btn" @click="showVideoDialog = true, currentVideo = getPath(item.content)"><img
-                                    src="../../../assets/chat/play.png" alt="" width="45"></div>
-                        </div>
-                        <div v-else-if="item.type == 'file'" class="aChat-file" @click="downloadFile(item.content)">
-                            <div class="aChat-file-filename">
-                                {{ _getFileName(item.content) }}
+                        <div class="aChat" style="white-space: pre-wrap;" :class="item.type">
+                            <div v-if="item.type == 'text'">
+                                {{ item.content }}
                             </div>
-                            <img :src="_getFileIcons(item.content)" alt="" style="width: 40px; object-fit: contain" />
+                            <div v-else-if="item.type == 'image'">
+                                <el-image :src="getPath(item.content)" :alt="item.content"
+                                    style="width: 200px;object-fit:contain" :preview-src-list="[getPath(item.content)]" />
+                            </div>
+                            <div v-else-if="item.type == 'video'">
+                                <video :src="getPath(item.content)" muted style="width: 300px;object-fit:cover"></video>
+                                <div class="play-btn" @click="showVideoDialog = true, currentVideo = getPath(item.content)">
+                                    <img src="@/assets/chat/play.png" alt="" width="45">
+                                </div>
+                            </div>
+                            <div v-else-if="item.type == 'file'" class="aChat-file" @click="downloadFile(item.content)">
+                                <div class="aChat-file-filename">
+                                    {{ _getFileName(item.content) }}
+                                </div>
+                                <img :src="_getFileIcons(item.content)" alt="" style="width: 40px; object-fit: contain" />
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
             <div class="send-message" id="message">
                 <div class="send-message-header">
-                    <img src="../../../assets/chat/icon.png" alt="" @click.stop="showEmoji = !showEmoji">
-                    <img src="../../../assets/chat/photo.png" alt="" @click="choosePhoto">
-                    <img src="../../../assets/chat/folder.png" alt="" @click="chooseFile">
-                    <img src="../../../assets/chat/audio.png" alt="" @click="SendAudioInvitation">
-                    <img src="../../../assets/chat/video.png" alt="" @click="SendVideoInvitation">
+                    <img src="@/assets/chat/icon.png" alt="" @click.stop="showEmoji = !showEmoji">
+                    <img src="@/assets/chat/photo.png" alt="" @click="choosePhoto">
+                    <img src="@/assets/chat/folder.png" alt="" @click="chooseFile">
+                    <img src="@/assets/chat/audio.png" alt="" @click="SendAudioInvitation">
+                    <img src="@/assets/chat/video.png" alt="" @click="SendVideoInvitation">
                     <input type="file" id="send-message-header-img-file" accept="image/*,video/*" style="display: none"
                         @change="SendImage">
                     <input type="file" id="send-message-header-file" accept="*" style="display: none" @change="SendFile">
@@ -106,6 +112,7 @@
 const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
 import { EmojiList } from '@/utils/emoji';
+import { toggleTime } from '@/utils/timeFormat';
 import { getFileSuffix2, getFileSuffix, getFileIcons, getFileName } from '@/utils/file'
 
 export default {
@@ -128,6 +135,8 @@ export default {
             avatar: "",
             content: "",
             chatList: [],
+            //计入所有的时间
+            messageTimeList: [],
             /**
              * 表情包
              * */
@@ -144,22 +153,25 @@ export default {
         };
     },
     created() {
-        this.sendType = localStorage.getItem('sendType') ? localStorage.getItem('sendType') : 'enter'
-        this.containerAni = 'opacity:0'
-        this.empty = false
-        this.sender_id = this.$store.getters.userInfo.id
-        this.username = this.$store.getters.userInfo.username
-        this.avatar = this.$store.getters.userInfo.avatar
-        this.room = this.options.room
-        this.receiver_id = this.options.user_id
-        this.name = this.options.name
-        this.initSocket()
-        this.initRTCSocket()
-        this.chatList = []
-        setTimeout(() => {
-            this.containerAni = 'opacity:1'
+        if (this.options) {
+            this.sendType = localStorage.getItem('sendType') ? localStorage.getItem('sendType') : 'enter'
+            this.containerAni = 'opacity:0'
             this.empty = false
-        }, 100);
+            this.sender_id = this.$store.getters.userInfo.id
+            this.username = this.$store.getters.userInfo.username
+            this.avatar = this.$store.getters.userInfo.avatar
+            this.room = this.options.room
+            this.receiver_id = this.options.user_id
+            this.name = this.options.name
+            this.initSocket()
+            this.initRTCSocket()
+            this.chatList = []
+            setTimeout(() => {
+                this.containerAni = 'opacity:1'
+                this.empty = false
+            }, 100);
+        }
+
     },
     watch: {
         options(newOptions, oldOptions) {
@@ -185,6 +197,19 @@ export default {
             }
         },
         deep: true
+    },
+    computed: {
+        List() {
+            return this.chatList.map(item => {
+                let sendTime = toggleTime(item.created_at)
+                if (this.messageTimeList.indexOf(sendTime) == -1) {
+                    item.sendTime = sendTime
+                    this.messageTimeList.push(sendTime)
+                }
+                // 处理数据
+                return item;
+            });
+        }
     },
     updated() {
         this.$nextTick(() => {
@@ -214,7 +239,7 @@ export default {
                 this.socket.close()
                 this.socket = null
             }
-            this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/message/single?room=${this.room}&id=${this.sender_id}`)
+            this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/message/chat?room=${this.room}&id=${this.sender_id}&type=private`)
             this.socket.onopen = () => {
                 console.log('连接成功');
             };
@@ -306,6 +331,26 @@ export default {
         //发送文件
         async SendFile(e) {
             if (e.target.files.length > 0) {
+                var file = e.target.files[0];
+                if (getFileSuffix2(file.name) != 'file') {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const fileContent = event.target.result;
+                        const content = new Uint8Array(fileContent);
+                        let filename = file.name
+                        this.socket.send(JSON.stringify({
+                            "filename": filename,
+                            "sender_id": this.sender_id,
+                            "receiver_id": this.receiver_id,
+                            "content": Array.from(content),
+                            "avatar": this.avatar,
+                            "room": this.room,
+                            "type": getFileSuffix2(filename)
+                        }))
+                    };
+                    reader.readAsArrayBuffer(file);
+                    return
+                }
                 const loading = this.$loading({
                     target: document.getElementById("message"),
                     lock: true,
@@ -313,7 +358,7 @@ export default {
                     spinner: 'el-icon-loading',
                     background: 'rgba(0, 0, 0, 0.7)'
                 });
-                var file = e.target.files[0];
+
                 // 发送文件信息
                 const fileInfo = {
                     fileName: file.name,
@@ -403,7 +448,7 @@ export default {
                 this.rtcsocket.close()
                 this.rtcsocket = null
             }
-            this.rtcsocket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/single?room=${this.room}&username=${this.username}_listen`)
+            this.rtcsocket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/chat?room=${this.room}&username=${this.username}_listen&type=private`)
             const { ipcRenderer } = window.require('electron');
             this.rtcsocket.onmessage = (message) => {
                 let data = JSON.parse(message.data)
@@ -511,6 +556,20 @@ export default {
             box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
             overflow: auto;
             position: relative;
+            text-align: center;
+
+            .chat-item {
+                margin: 10px 0;
+            }
+
+            .message-create-time {
+                font-size: 10px;
+                padding: 2px 0;
+                color: #606266;
+                display: inline-block;
+                padding: 5px;
+                margin: 0 auto;
+            }
 
             .other {
                 display: flex;
@@ -832,5 +891,4 @@ export default {
 
 ::v-deep .el-dropdown__caret-button {
     padding: 5px 5px;
-}
-</style>
+}</style>

@@ -2,7 +2,8 @@
     <div class="container">
         <SideBar @changeStatus="changeStatus" ref="SideBar" @getAIoptions="getAIoptions"></SideBar>
         <List :current="current" ref="List" @ListCHangeStatus="ListCHangeStatus" @chooseRoom="chooseRoom"></List>
-        <chatRoom :options="options" @updateList="updateList" v-if="!AI"></chatRoom>
+        <chatRoom :options="options" @updateList="updateList" v-if="!group && !AI"></chatRoom>
+        <groupRoom :options="groupOptions" @updateList="updateList" v-if="group && !AI"></groupRoom>
         <AIRoom :options="AIoptions" v-if="AI"></AIRoom>
     </div>
 </template>
@@ -11,10 +12,11 @@
 // 在渲染进程中发送消息通知主进程修改窗口大小
 
 
-import SideBar from './components/sidebar.vue'
-import List from './components/list.vue'
-import chatRoom from './components/chatRoom.vue'
-import AIRoom from './components/AIRoom.vue'
+import SideBar from './components/SideBar/sidebar.vue'
+import List from './components/List/list.vue'
+import chatRoom from './components/Room/chatRoom.vue'
+import AIRoom from './components/Room/AIRoom.vue'
+import groupRoom from './components/Room/groupRoom.vue'
 import { getConversationInfo } from '@/api/bing';
 const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
@@ -23,7 +25,8 @@ export default {
         SideBar,
         List,
         chatRoom,
-        AIRoom
+        AIRoom,
+        groupRoom
     },
 
     data() {
@@ -40,6 +43,11 @@ export default {
              * 聊天框相关参数
              */
             options: "",
+            /**
+             * 群聊相关
+             */
+            group: false,
+            groupOptions: "",
             /**
              * bing相关参数
              */
@@ -93,9 +101,14 @@ export default {
                     return this.$message.warning("你无法进行AI对话,请前往设置中生成")
                 }
                 this.AI = true
+            } else if (!item.group_id) {
+                this.AI = false
+                this.group = false
+                this.options = item
             } else {
                 this.AI = false
-                this.options = item
+                this.group = true
+                this.groupOptions = item
             }
         },
         updateList() {

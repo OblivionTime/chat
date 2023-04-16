@@ -29,6 +29,7 @@ function authenticateToken(req, res, next) {
 }
 module.exports = function () {
     router.get('/list', authenticateToken, message.List)
-    router.ws('/single',message.SingleConnect)
+
+    router.ws('/chat', message.ChatConnect)
     return router
 }

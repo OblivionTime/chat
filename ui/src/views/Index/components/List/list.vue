@@ -139,8 +139,8 @@
 
 <script>
 
-import Chat from './List/chat.vue';
-import Contact from './List/contact.vue';
+import Chat from './chat.vue';
+import Contact from './contact.vue';
 import { getFriend_list, postAdd_friend, getSearch } from '@/api/friend';
 import { postCreate_group, getGroupSearch, getJoin } from '@/api/group';
 export default {

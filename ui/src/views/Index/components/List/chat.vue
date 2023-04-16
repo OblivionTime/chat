@@ -1,10 +1,10 @@
 <template>
     <div class="chat-list">
         <div class="chat-item" v-for="item in ChatList" :key="item.room" @click="chooseRoom(item)"
-            :style="currentRoom == item.user_id ? 'background-color: #eee;' : ''">
+            :style="currentStyle(item)">
             <div class="chat-avatar">
-                <img :src="item.avatar ? item.avatar : require('@/assets/logo.png')" alt="" width="45" height="45"
-                    style="object-fit: cover;">
+                <img :src="item.avatar ? getAvatarPath(item.avatar) : require('@/assets/logo.png')" alt="" width="45"
+                    height="45" style="object-fit: cover;">
             </div>
             <div class="chat-info">
                 <div class="chat-title">
@@ -36,7 +36,8 @@ export default {
         return {
             ChatList: [],
             currentRoom: '',
-            timer: ''
+            timer: '',
+            cureentGroup: false,
         };
     },
     mounted() {
@@ -56,6 +57,7 @@ export default {
                         unreadCount: 0,
                         updated_at: "now",
                         AI: true,
+                        user_id: 0
                     }]
                     for (const item of res.data) {
                         item.updated_at = toggleTime2(item.updated_at)
@@ -64,9 +66,23 @@ export default {
                     this.ChatList = ChatList
                 })
         },
+        currentStyle(item) {
+            if (this.cureentGroup) {
+                return this.currentRoom == item.group_id ? 'background-color: #eee;' : ''
+            } else {
+                return this.currentRoom == item.user_id ? 'background-color: #eee;' : ''
+            }
+        },
         //选择房间
         chooseRoom(item) {
-            this.currentRoom = item.user_id
+
+            if (item.group_id) {
+                this.cureentGroup = true
+                this.currentRoom = item.group_id
+            } else {
+                this.cureentGroup = false
+                this.currentRoom = item.user_id
+            }
             this.$emit('chooseRoom', item);
         },
         //解析最后一条消息
@@ -80,6 +96,13 @@ export default {
             } else if (item.type == 'file') {
                 return "[文件]"
             }
+        },
+        //获取头像地址
+        getAvatarPath(content) {
+            if (content.includes("upload")) {
+                return this.ipaddress + content
+            }
+            return content
         }
     },
     destroyed() {
@@ -102,7 +125,7 @@ export default {
         height: 50px;
         padding: 10px 0 10px 10px;
         display: flex;
-        align-items: center;
+        // align-items: center;
         justify-content: space-between;
 
         &:hover {
