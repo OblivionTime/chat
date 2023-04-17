@@ -151,8 +151,6 @@ export default {
                 this.$message.success("注销成功,即将跳转到登录界面");
                 setTimeout(() => {
                     this.$router.push(`/login?redirect=${this.$route.fullPath}`);
-                    const { ipcRenderer } = window.require('electron');
-                    ipcRenderer.send('resize-window', { width: 400, height: 320 });
                 }, 1000);
             });
         },

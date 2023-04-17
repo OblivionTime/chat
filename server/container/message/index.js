@@ -108,14 +108,13 @@ async function ChatConnect(ws, req) {
     let sql
     let resp
     if (type == 'group') {
-        sql = 'SELECT gm.nickname,m.*,u.avatar FROM (SELECT sender_id, receiver_id, content, room, media_type,message.created_at FROM message WHERE `room` =? AND `type` = ?  ORDER BY created_at ASC) AS m LEFT JOIN user as u ON u.`id`=m.`sender_id` LEFT JOIN group_members as gm on gm.group_id=? and user_id=u.`id`'
+        sql = 'SELECT gm.nickname,m.*,u.avatar FROM (SELECT sender_id, receiver_id, content, room, media_type,message.created_at FROM message WHERE `room` =? AND `type` = ?) AS m LEFT JOIN user as u ON u.`id`=m.`sender_id` LEFT JOIN group_members as gm on gm.group_id=? and user_id=u.`id` ORDER BY created_at ASC'
         resp = await Query(sql, [room, type, id])
     } else {
         sql = 'SELECT m.*,u.avatar FROM (SELECT sender_id, receiver_id, content, room, media_type,message.created_at FROM message WHERE `room` =? AND `type` = ?  ORDER BY created_at ASC) AS m LEFT JOIN user as u ON u.`id`=m.`sender_id`'
         resp = await Query(sql, [room, type])
     }
     let results = resp.results
-    console.log(results);
     let histroyMsg = results.map((item) => {
         return {
             "sender_id": item.sender_id,

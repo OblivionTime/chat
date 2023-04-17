@@ -25,7 +25,7 @@
             <div class="chat-content" ref="record">
 
                 <div v-for="item, index in List" :key="index" class="chat-item">
-                    <span class="message-create-time">{{ item.sendTime }}</span>
+                    <span class="message-create-time" v-if="item.sendTime">{{ item.sendTime }}</span>
                     <div :class="item.sender_id == sender_id ? 'self' : 'other'">
                         <div class="avatar" :class="'avatar-' + item.type">
                             <img :src="item.avatar ? getPath(item.avatar) : require('@/assets/logo.png')" alt="" srcset=""
@@ -188,7 +188,7 @@ export default {
                 this.receiver_id = this.options.user_id
                 this.name = this.options.name
                 this.initSocket()
-                this.initRTCSocket()
+                // this.initRTCSocket()
                 this.chatList = []
                 setTimeout(() => {
                     this.containerAni = 'opacity:1'
@@ -428,19 +428,13 @@ export default {
          */
         //发送语音邀请
         SendAudioInvitation() {
-            if (this.callActive) {
-                return this.$message.error("正在通话中....")
-            }
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'audio' });
+            this.$emit("sendInvitation", { room: this.room, sender: this.username, receiver: this.name, beInviter: 0, method: 'audio' })
+            // const { ipcRenderer } = window.require('electron');
+            // ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'audio' });
         },
         //发送视频邀请
         SendVideoInvitation() {
-            if (this.callActive) {
-                return this.$message.error("正在通话中....")
-            }
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'video' });
+            this.$emit("sendInvitation", { room: this.room, sender: this.username, receiver: this.name, beInviter: 0, method: 'video' })
         },
         //监听别人打语音视频电话
         initRTCSocket() {
@@ -891,4 +885,5 @@ export default {
 
 ::v-deep .el-dropdown__caret-button {
     padding: 5px 5px;
-}</style>
+}
+</style>

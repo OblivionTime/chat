@@ -2,7 +2,8 @@
     <div class="container">
         <SideBar @changeStatus="changeStatus" ref="SideBar" @getAIoptions="getAIoptions"></SideBar>
         <List :current="current" ref="List" @ListCHangeStatus="ListCHangeStatus" @chooseRoom="chooseRoom"></List>
-        <chatRoom :options="options" @updateList="updateList" v-if="!group && !AI"></chatRoom>
+        <chatRoom :options="options" @updateList="updateList" @sendInvitation="sendInvitation" v-if="!group && !AI">
+        </chatRoom>
         <groupRoom :options="groupOptions" @updateList="updateList" v-if="group && !AI"></groupRoom>
         <AIRoom :options="AIoptions" v-if="AI"></AIRoom>
     </div>
@@ -20,6 +21,8 @@ import groupRoom from './components/Room/groupRoom.vue'
 import { getConversationInfo } from '@/api/bing';
 const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
+import { mapActions } from "vuex";
+const { ipcRenderer } = window.require('electron');
 export default {
     components: {
         SideBar,
@@ -58,7 +61,6 @@ export default {
         };
     },
     created() {
-        const { ipcRenderer } = window.require('electron');
         ipcRenderer.send('resize-window', { width: 1000, height: 600 });
         this.getBingData()
         //检测窗口关闭,自动挂断电话
@@ -70,12 +72,14 @@ export default {
         this.initSocket()
     },
     methods: {
+        ...mapActions(["Logout"]),
         /**
          * 通信相关
          */
         initSocket() {
             this.socket = new WebSocket(`${this.wssaddress}/api/chat/v1/auth/user_channel?username=${this.$store.getters.userInfo.username}`)
             this.socket.onmessage = (message) => {
+                let options
                 let data = JSON.parse(message.data)
                 switch (data.name) {
                     case "friend":
@@ -83,8 +87,61 @@ export default {
                         //重新加载消息列表
                         this.updateList()
                         break
+                    //音视频
+                    case "audio":
+                        options = {
+                            method: data.name,
+                            room: data.room,
+                            sender: data.sender_name,
+                            receiver: data.receiver_username,
+                            beInviter: 1
+                        }
+                        ipcRenderer.send('open-window', options);
+                        break
+                    //音视频
+                    case "video":
+                        options = {
+                            method: data.name,
+                            room: data.room,
+                            sender: data.sender_name,
+                            receiver: data.receiver_username,
+                            beInviter: 1
+                        }
+                        ipcRenderer.send('open-window', options);
+                        break
+                    //音视频相应
+                    case "peer":
+                        options = {
+                            method: data.method,
+                            room: data.room,
+                            sender: data.sender_name,
+                            receiver: data.receiver_username,
+                            beInviter: 0
+                        }
+                        ipcRenderer.send('open-window', options);
+                        break
+                    //拒绝
+                    case "reject":
+                        if (data.message) {
+                            this.$message.error(data.message)
+                        } else {
+                            this.socket.send(JSON.stringify({ name: "reject" }))
+                        }
+                        break;
+                    case "logout":
+                        this.$message.error("你已在其他地方被登录!!!")
+                        break;
+
                 }
             }
+            this.socket.onclose = () => {
+                this.Logout()
+            }
+        },
+        //音视频邀请
+        sendInvitation(options) {
+            console.log(options);
+            this.socket.send(JSON.stringify({ name: options.method, sender_name: options.sender, receiver_username: options.receiver, room: options.room, beInviter: options.beInviter }))
         },
         //改变侧边栏选项
         changeStatus(tag) {

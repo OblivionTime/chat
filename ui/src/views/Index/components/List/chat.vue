@@ -35,7 +35,7 @@ export default {
     data() {
         return {
             ChatList: [],
-            currentRoom: '',
+            currentRoom: -1,
             timer: '',
             cureentGroup: false,
         };

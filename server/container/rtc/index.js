@@ -27,13 +27,11 @@ async function SingleRTCConnect(ws, req) {
         rooms[room] = {}
     }
     rooms[room][username] = ws
-    let flag = false
     ws.on('message', async (Resp_data) => {
         let message = JSON.parse(Resp_data)
         let msg
         let receiverWs
         switch (message.name) {
-
             //创建房间
             case 'createRoom':
                 //发送邀请
@@ -42,8 +40,6 @@ async function SingleRTCConnect(ws, req) {
                     sender: username
                 }
                 BroadcastSocket(username, room, msg)
-                ListenWs = rooms[room][username + "_listen"]
-                ListenWs.send(JSON.stringify({ name: "status", flag: true }))
                 break;
             //被邀请方接收
             case 'peer':
@@ -55,9 +51,6 @@ async function SingleRTCConnect(ws, req) {
                 }
                 receiverWs = rooms[room][message.receiver]
                 receiverWs.send(JSON.stringify(msg))
-                ListenWs = rooms[room][username + "_listen"]
-                ListenWs.send(JSON.stringify({ name: "status", flag: true }))
-                flag = true
                 break;
             //接收answer
             case 'answer':
@@ -69,7 +62,6 @@ async function SingleRTCConnect(ws, req) {
                 }
                 receiverWs = rooms[room][message.receiver]
                 receiverWs.send(JSON.stringify(msg))
-                flag = true
                 break
             case 'ice_candidate':
                 //接收answer
@@ -88,10 +80,9 @@ async function SingleRTCConnect(ws, req) {
                     name: "reject",
                     sender: username
                 }
-                flag = false
+                console.log(username, msg);
                 BroadcastSocket(username, room, msg)
-                ListenWs = rooms[room][username + "_listen"]
-                ListenWs.send(JSON.stringify({ name: "status", flag: false }))
+                NotificationUser({ name: "reject", receiver_username: username, message: "" })
                 break;
         }
     })
@@ -102,7 +93,7 @@ async function SingleRTCConnect(ws, req) {
 //发送给其他人
 function BroadcastSocket(username, room, data) {
     for (const key in rooms[room]) {
-        if (key == username || key == username + '_listen') {
+        if (key == username) {
             continue
         }
         if (rooms[room][key]) {
