@@ -1,7 +1,12 @@
 module.exports = {
     List,
     AddFriend,
-    SearchUser
+    SearchUser,
+    getFriendInfo,
+    createFriendGroup,
+    updateFriendGroup,
+    updateFriendInfo,
+    getFriendGroupList
 };
 let { RespParamErr, RespServerErr, RespExitFriendErr, RespUpdateErr, RespCreateErr } = require('../../model/error');
 const { v4: uuidv4 } = require('uuid');
@@ -114,7 +119,6 @@ async function AddFriend(req, res) {
 
     let friendInfo = {
         username: username,
-        avatar: info.avatar,
         remark: username,
         group_id: results[0].id,
         user_id: id,
@@ -131,7 +135,6 @@ async function AddFriend(req, res) {
     let usr2 = await Query(sql, [username])
     let friendInfo2 = {
         username: user.username,
-        avatar: "",
         remark: user.username,
         group_id: usr2.results[0].id,
         user_id: user.id,
@@ -202,6 +205,85 @@ async function SearchUser(req, res) {
         }
     }
     RespData(res, searchList)
+}
+/**
+ * 获取好友信息
+ * 1.获取用户账号,昵称,备注,分组.个性签名,头像
+ * 2.根据group_id和user_id查询friend表,获取user_id,username,remark和group_id
+ * 3.根据user表获取头像,个性签名,昵称
+ */
+async function getFriendInfo(req, res) {
+    const { group_id, user_id } = req.query
+    let sql = 'SELECT user_id,room,user.username,user.signature,user.avatar,user.name,remark,group_id FROM friend,user WHERE group_id=? and user_id=? and user.id=?'
+    let { err, results } = await Query(sql, [group_id, user_id, user_id])
+    let userInfo = {
+        user_id: "",
+        username: "",
+        avatar: "",
+        name: "",
+        remark: "",
+        group_id: "",
+        signature: "",
+        room: "",
+    }
+    if (results.length > 0) {
+        userInfo = results[0]
+    }
+    // 查询数据失败
+    if (err) return RespError(res, RespServerErr)
+    RespData(res, userInfo)
+}
+/**
+ * 添加好友分组
+ */
+async function createFriendGroup(req, res) {
+    const friend_group = req.body
+    let sql = 'insert into friend_group set ?'
+    let { err, results } = await Query(sql, friend_group)
+    // 查询数据失败
+    if (err) return RespError(res, RespServerErr)
+    if (results.affectedRows === 1) {
+        return RespSuccess(res)
+    }
+}
+/**
+ * 获取当前用户的分组列表
+ */
+async function getFriendGroupList(req, res) {
+    let user_id = req.user.id
+    const sql = 'select * from friend_group where user_id=?'
+    let { err, results } = await Query(sql, [user_id])
+    // 查询数据失败
+    if (err) return RespError(res, RespServerErr)
+    RespData(res, results)
+}
+/**
+ * 修改好友分组
+ */
+async function updateFriendGroup(req, res) {
+    const { name, user_id, old_name } = req.body
+    let sql = 'update friend_group set name=? where user_id=? and name=?'
+    let { err, results } = await Query(sql, [name, user_id, old_name])
+    // 查询数据失败
+    if (err) return RespError(res, RespServerErr)
+    if (results.affectedRows === 1) {
+        return RespSuccess(res)
+    }
+    return RespError(res, RespUpdateErr)
+}
+/**
+ * 修改好友的信息
+ */
+async function updateFriendInfo(req, res) {
+    const { old_group_id, user_id, new_group_id, remark } = req.body
+    let sql = 'update friend set group_id=?,remark=? where user_id=? and group_id=?'
+    let { err, results } = await Query(sql, [new_group_id, remark, user_id, old_group_id])
+    // 查询数据失败
+    if (err) return RespError(res, RespServerErr)
+    if (results.affectedRows === 1) {
+        return RespSuccess(res)
+    }
+    return RespError(res, RespUpdateErr)
 }
 //查询好友信息
 async function getFriendList(group_id) {

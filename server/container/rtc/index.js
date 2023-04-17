@@ -80,7 +80,6 @@ async function SingleRTCConnect(ws, req) {
                     name: "reject",
                     sender: username
                 }
-                console.log(username, msg);
                 BroadcastSocket(username, room, msg)
                 NotificationUser({ name: "reject", receiver_username: username, message: "" })
                 break;

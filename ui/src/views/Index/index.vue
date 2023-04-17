@@ -1,11 +1,13 @@
 <template>
     <div class="container">
         <SideBar @changeStatus="changeStatus" ref="SideBar" @getAIoptions="getAIoptions"></SideBar>
-        <List :current="current" ref="List" @ListCHangeStatus="ListCHangeStatus" @chooseRoom="chooseRoom"></List>
-        <chatRoom :options="options" @updateList="updateList" @sendInvitation="sendInvitation" v-if="!group && !AI">
+        <List :current="current" ref="List" @ListChangeStatus="ListChangeStatus" @chooseRoom="chooseRoom"
+            @showFriendInfo="showFriendInfo"></List>
+        <chatRoom :options="options" @updateList="updateList" @sendInvitation="sendInvitation" v-if="currentRoom == 'chat'">
         </chatRoom>
-        <groupRoom :options="groupOptions" @updateList="updateList" v-if="group && !AI"></groupRoom>
-        <AIRoom :options="AIoptions" v-if="AI"></AIRoom>
+        <groupRoom :options="groupOptions" @updateList="updateList" v-if="currentRoom == 'group'"></groupRoom>
+        <AIRoom :options="AIoptions" v-if="currentRoom == 'ai'"></AIRoom>
+        <Info :options="friendoptions" v-if="currentRoom == 'info'" @sendFriendMessage="sendFriendMessage"></Info>
     </div>
 </template>
 
@@ -18,6 +20,7 @@ import List from './components/List/list.vue'
 import chatRoom from './components/Room/chatRoom.vue'
 import AIRoom from './components/Room/AIRoom.vue'
 import groupRoom from './components/Room/groupRoom.vue'
+import Info from './components/Room/Info.vue'
 import { getConversationInfo } from '@/api/bing';
 const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
@@ -29,7 +32,8 @@ export default {
         List,
         chatRoom,
         AIRoom,
-        groupRoom
+        groupRoom,
+        Info
     },
 
     data() {
@@ -45,19 +49,22 @@ export default {
             /**
              * 聊天框相关参数
              */
+            currentRoom: "chat",
             options: "",
             /**
              * 群聊相关
              */
-            group: false,
             groupOptions: "",
             /**
              * bing相关参数
              */
-            AI: false,
             AIoptions: {
                 room: ""
-            }
+            },
+            /**
+             *  好友信息或群聊相关参数 
+             */
+            friendoptions: ""
         };
     },
     created() {
@@ -130,17 +137,14 @@ export default {
                         break;
                     case "logout":
                         this.$message.error("你已在其他地方被登录!!!")
+                        this.Logout()
                         break;
 
                 }
             }
-            this.socket.onclose = () => {
-                this.Logout()
-            }
         },
         //音视频邀请
         sendInvitation(options) {
-            console.log(options);
             this.socket.send(JSON.stringify({ name: options.method, sender_name: options.sender, receiver_username: options.receiver, room: options.room, beInviter: options.beInviter }))
         },
         //改变侧边栏选项
@@ -148,28 +152,49 @@ export default {
             this.current = tag
 
         },
-        ListCHangeStatus(tag) {
+        ListChangeStatus(tag) {
             this.$refs.SideBar.changeStatus(tag)
             this.updateList()
+
         },
         chooseRoom(item) {
             if (item.AI) {
                 if (!this.AIoptions.room) {
                     return this.$message.warning("你无法进行AI对话,请前往设置中生成")
                 }
-                this.AI = true
+                this.$nextTick(() => {
+                    this.$refs.List.updatecurrentRoom(0)
+                });
+                this.currentRoom = 'ai'
             } else if (!item.group_id) {
-                this.AI = false
-                this.group = false
+                this.currentRoom = 'chat'
                 this.options = item
-            } else {
-                this.AI = false
-                this.group = true
+            } else if (item.group_id) {
+                this.currentRoom = 'group'
                 this.groupOptions = item
+            } else if (item.info) {
+                this.currentRoom = 'info'
             }
         },
         updateList() {
-            this.$refs.List.loadListData()
+            this.$nextTick(() => {
+                this.$refs.List.loadListData()
+            });
+        },
+        /***
+         * 好友详情相关信息
+         */
+        showFriendInfo(item) {
+            this.currentRoom = 'info'
+            this.friendoptions = item
+        },
+        sendFriendMessage(item) {
+            this.currentRoom = 'chat'
+            this.ListChangeStatus("chat")
+            this.options = item
+            this.$nextTick(() => {
+                this.$refs.List.updatecurrentRoom(item.user_id)
+            });
         },
         /**
          * bing相关方法

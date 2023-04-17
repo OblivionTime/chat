@@ -8,7 +8,6 @@ async function NotificationUser(data) {
         let { results } = await Query(sql, [data.receiver_id])
         receiver_username = results[0].username
     }
-    console.log("NotificationUser",data);
     if (LoginRooms[receiver_username]) {
         LoginRooms[receiver_username].send(JSON.stringify(data))
     }

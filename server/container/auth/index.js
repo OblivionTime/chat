@@ -278,13 +278,13 @@ function initUserNotification(ws, req) {
     //音视频状态,用户
     var status = false
     //如果用户已经登录则强制退出当前用户
-    // if (LoginRooms[username]) {
-    //     LoginRooms[username].close()
-    // }
+    if (LoginRooms[username]) {
+        LoginRooms[username].send(JSON.stringify({ name: "logout" }))
+        LoginRooms[username].close()
+    }
     LoginRooms[username] = ws
     ws.on('message', function (Resp_data) {
         let data = JSON.parse(Resp_data)
-        console.log(username, data);
         //接收者
         let receiver_username = data.receiver_username
         if (data.name == 'audio' || data.name == 'video') {

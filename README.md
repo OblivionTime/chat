@@ -1,5 +1,6 @@
 
 
+
 # <center>翎<center>
 # 🎥项目演示地址
 🔗[https://www.bilibili.com/video/BV1Fg4y1u76d/](https://www.bilibili.com/video/BV1Fg4y1u76d/)
@@ -33,8 +34,6 @@ node-pty需要python依赖,这个只能根据错误去一个一个查找问题
 
 # 🧨项目目前存在的问题
 * 如果在同一台电脑上,进行视频通话,是不成功的,因为会出现摄像头也被占用问题,但是语音通话是可以的
-* 目前逻辑是必须双方都在同时相互聊天,才能进行语音和视频通话
-* 目前用户可以同时和不同的人同时进行音视频(后期会修改这个逻辑)
 * 目前视频通话存在画质模糊问题(待修复)
 # 🥑已修复的bug
 1. 文件下载出现了白屏
@@ -60,14 +59,19 @@ node-pty需要python依赖,这个只能根据错误去一个一个查找问题
 * 发送表情包,图片,文字,文件(50mb以内)
 * 支持一对一语音通话,一对一视频通话
 * 集成`new bing`
-# 🎗️待完成功能
-* 搜索好友和群聊
 * 群聊
 * 修改好友备注
-* 好友通过请求
-* 删除好友
+# 🎗️待完成功能
+* 搜索好友和群聊
 * 群视频
 * 共享屏幕
+# 🖼️ 项目截图
+![在这里插入图片描述](https://img-blog.csdnimg.cn/163aa1f40fc14711915900ff7df25ce0.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/515d30cb15194de3972bf838ec8c8b59.png)![在这里插入图片描述](https://img-blog.csdnimg.cn/ec92a4770c5642758c248c4b93ce7cc7.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/66c0aa6e5a5742fba29689cd8710115b.png)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/76c65c9dd9f0417aab6a5de5bc0a92b1.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/0e93ab57d76e424e88d381c9d9db3cb8.png)
 
 # 🤖如何在项目使用new bing
 ## 你必须要满足以下条件
@@ -225,7 +229,6 @@ Express-ws支持标准的WebSocket协议和Socket.IO协议，可以通过简单�
 * id: 该字段为自增主键，表示每个朋友记录的唯一标识符。
 * user_id: 该字段表示朋友所属的用户 ID。
 * username: 该字段表示朋友的用户名。
-* avatar: 该字段表示朋友的头像图片链接地址，可以为 NULL。
 * online_status: 该字段表示朋友的在线状态，取值为 online 或 offline。
 * remark: 该字段表示朋友的备注，可以为 NULL。
 * group_id: 该字段表示朋友所属的朋友分组 ID，可以为 NULL。

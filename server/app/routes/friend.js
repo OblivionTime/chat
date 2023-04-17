@@ -31,5 +31,10 @@ module.exports = function () {
     router.get('/list', authenticateToken, friend.List)
     router.post('/add_friend', authenticateToken, friend.AddFriend)
     router.get('/search', authenticateToken, friend.SearchUser)
+    router.get('/info', authenticateToken, friend.getFriendInfo)
+    router.get('/group_list', authenticateToken, friend.getFriendGroupList)
+    router.post('/create', authenticateToken, friend.createFriendGroup)
+    router.post('/update', authenticateToken, friend.updateFriendGroup)
+    router.post('/update_friend', authenticateToken, friend.updateFriendInfo)
     return router
 }

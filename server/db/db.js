@@ -60,7 +60,6 @@ function initFirendTable() {
         id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
         user_id INT(11) NOT NULL,
         username VARCHAR(50) NOT NULL,
-        avatar VARCHAR(255),
         online_status ENUM('online', 'offline') DEFAULT 'offline',
         remark VARCHAR(50),
         group_id INT(11),

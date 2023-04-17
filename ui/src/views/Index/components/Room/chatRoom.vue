@@ -113,7 +113,7 @@ const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
 import { EmojiList } from '@/utils/emoji';
 import { toggleTime } from '@/utils/timeFormat';
-import { getFileSuffix2, getFileSuffix, getFileIcons, getFileName } from '@/utils/file'
+import { getFileSuffix2, getFileIcons, getFileName } from '@/utils/file'
 
 export default {
 
@@ -129,6 +129,7 @@ export default {
             sender_id: 1,
             receiver_id: 2,
             username: "",
+            receiver_username: "",
             room: "",
             name: "",
             sendType: 'enter',
@@ -154,6 +155,7 @@ export default {
     },
     created() {
         if (this.options) {
+            console.log(this.options);
             this.sendType = localStorage.getItem('sendType') ? localStorage.getItem('sendType') : 'enter'
             this.containerAni = 'opacity:0'
             this.empty = false
@@ -163,8 +165,8 @@ export default {
             this.room = this.options.room
             this.receiver_id = this.options.user_id
             this.name = this.options.name
+            this.receiver_username = this.options.receiver_username
             this.initSocket()
-            this.initRTCSocket()
             this.chatList = []
             setTimeout(() => {
                 this.containerAni = 'opacity:1'
@@ -187,8 +189,8 @@ export default {
                 this.room = this.options.room
                 this.receiver_id = this.options.user_id
                 this.name = this.options.name
+                this.receiver_username = this.options.receiver_username
                 this.initSocket()
-                // this.initRTCSocket()
                 this.chatList = []
                 setTimeout(() => {
                     this.containerAni = 'opacity:1'
@@ -428,46 +430,12 @@ export default {
          */
         //发送语音邀请
         SendAudioInvitation() {
-            this.$emit("sendInvitation", { room: this.room, sender: this.username, receiver: this.name, beInviter: 0, method: 'audio' })
-            // const { ipcRenderer } = window.require('electron');
-            // ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'audio' });
+            this.$emit("sendInvitation", { room: this.room, sender: this.username, receiver: this.receiver_username, beInviter: 0, method: 'audio' })
         },
         //发送视频邀请
         SendVideoInvitation() {
-            this.$emit("sendInvitation", { room: this.room, sender: this.username, receiver: this.name, beInviter: 0, method: 'video' })
+            this.$emit("sendInvitation", { room: this.room, sender: this.username, receiver: this.receiver_username, beInviter: 0, method: 'video' })
         },
-        //监听别人打语音视频电话
-        initRTCSocket() {
-            if (this.rtcsocket) {
-                this.rtcsocket.close()
-                this.rtcsocket = null
-            }
-            this.rtcsocket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/chat?room=${this.room}&username=${this.username}_listen&type=private`)
-            const { ipcRenderer } = window.require('electron');
-            this.rtcsocket.onmessage = (message) => {
-                let data = JSON.parse(message.data)
-                switch (data.name) {
-                    case 'status':
-                        this.callActive = data.flag
-                        break
-                    case 'reject':
-                        this.callActive = false
-                        break
-                    case "audio_invitation":
-                        if (this.callActive) {
-                            return
-                        }
-                        ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 1, method: 'audio' });
-                        break;
-                    case "video_invitation":
-                        if (this.callActive) {
-                            return
-                        }
-                        ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 1, method: 'video' });
-                        break;
-                }
-            }
-        }
     },
     destroyed() {
         if (this.rtcsocket) {
