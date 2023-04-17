@@ -1,5 +1,5 @@
 <template>
-    <div class="contact-list">
+    <div class="contact-list" @contextmenu.prevent.stop="showMenu">
         <el-tabs v-model="activeName" stretch>
             <el-tab-pane label="好友" name="chat">
 
@@ -20,13 +20,16 @@
                     <!-- <div class="contact-headers">联系人列表</div> -->
                     <el-tree :data="FriendList" :props="defaultProps">
                         <div slot-scope="{ node, data }">
-                            <div v-if="data.children">
-                                {{ node.label }} {{ data.len + '/' + data.len }}
+                            <div v-if="data.children" @contextmenu.prevent.stop="showGroupMenu(node.label, $event)">
+                                <span :style="data.children.length == 0 ? 'padding-left:24px' : ''"> {{ node.label }} {{
+                                    data.len + '/' + data.len
+                                }}</span>
+
                             </div>
-                            <div v-else class="tree-item">
+                            <div v-else class="tree-item" @click="showFriendInfo(data)">
                                 <div class="tree-item-avatar">
-                                    <img :src="require('@/assets/sidebar/avatar.jpg')" alt="" width="30" height="30"
-                                        style="object-fit: cover;">
+                                    <img :src="data.avatar ? getAvatarPath(data.avatar) : require('@/assets/logo.png')"
+                                        alt="" width="30" height="30" style="object-fit: cover;">
                                 </div>
                                 <div class="tree-item-info">
                                     {{ node.label }}
@@ -55,14 +58,22 @@
                 </div>
             </el-tab-pane>
         </el-tabs>
+        <div class="menu" v-if="isShowMenu" :style="{ 'left': menuLeft + 'px', 'top': menuTop + 'px' }">
+            <home-menu :menus="menus" @hiddenMenu="hiddenMenu" />
+        </div>
     </div>
 </template>
 
 <script>
-import { getFriend_list } from '@/api/friend';
+import { getFriend_list, getFriendGroup_list, postCreate, postUpdate } from '@/api/friend';
 import { getGroup_list } from '@/api/group';
+import homeMenu from '@/components/HomeMenu'
+
 export default {
     name: 'Contact',
+    components: {
+        homeMenu
+    },
     data() {
         return {
             search: "",
@@ -71,18 +82,45 @@ export default {
             activeName: "chat",
             FriendList: [],
             groupList: [],
+            friendgroupList: [],
             defaultProps: {
                 children: 'children',
                 label: 'label',
-                len: 'len'
-            }
+                len: 'len',
+                user_id: 'user_id',
+                group_id: 'group_id',
+            },
+            menus: [],
+            /**
+             * 菜单相关
+             */
+            isShowMenu: false,
+            menuLeft: 0,
+            menuTop: 0,
+            old_name: ""
         };
     },
     created() {
-        this.loadFriendData()
-        this.loadGroupData()
+        this.loadData()
+        document.addEventListener('click', () => {
+            this.isShowMenu = false
+        })
+        document.addEventListener('mousedown', (e) => {
+            const { button } = e
+            if (button === 2) {
+                this.isShowMenu = false
+            }
+        })
     },
     methods: {
+        loadData() {
+            //加载好友列表
+            this.loadFriendData()
+            //加载群聊列表
+            this.loadGroupData()
+            //加载分组列表
+            this.loadGroupList()
+        },
         loadFriendData() {
             getFriend_list()
                 .then((res) => {
@@ -91,7 +129,7 @@ export default {
                         for (const item of res.data) {
                             let friend = { label: item.name, children: [], len: item.friend.length }
                             for (const f of item.friend) {
-                                friend.children.push({ label: f.remark, value: f.user_id })
+                                friend.children.push({ label: f.remark, value: f.user_id, group_id: f.group_id, user_id: f.user_id, avatar: f.avatar })
                             }
                             FriendList.push(friend)
                         }
@@ -108,12 +146,115 @@ export default {
                     }
                 })
         },
+        //加载当前用户所有分组
+        loadGroupList() {
+            getFriendGroup_list()
+                .then((res) => {
+                    if (res.code == 200) {
+                        let friendgroupList = []
+                        for (const item of res.data) {
+                            let friendgroup = { label: item.name, value: item.id }
+
+                            friendgroupList.push(friendgroup)
+                        }
+                        this.friendgroupList = friendgroupList
+                    }
+                })
+        },
         //获取头像地址
         getAvatarPath(content) {
             if (content.includes("upload")) {
                 return this.ipaddress + content
             }
             return content
+        },
+        /**
+         * 好友相关方法
+         */
+        showFriendInfo(data) {
+            this.$emit('showFriendInfo', { group_id: data.group_id, user_id: data.user_id, friendgroupList: this.friendgroupList });
+        },
+        /**
+         * 菜单相关
+         */
+        showMenu(e) {
+            this.menus = [
+                { name: "添加分组", RowClick: this.AddGroup },
+                { name: "刷新", RowClick: this.refreshGroup },
+            ]
+            this.isShowMenu = true
+            this.menuLeft = e.pageX
+            this.menuTop = e.pageY
+        },
+        showGroupMenu(label, e) {
+            this.old_name = label
+            this.menus = [
+                { name: "重命名", RowClick: this.renameGroup },
+                { name: "添加分组", RowClick: this.AddGroup },
+                { name: "刷新", RowClick: this.refreshGroup },
+                { name: "删除分组", RowClick: this.refreshGroup },
+            ]
+            this.isShowMenu = true
+            this.menuLeft = e.pageX
+            this.menuTop = e.pageY
+        },
+        hiddenMenu() {
+            this.isShowMenu = false
+        },
+        //添加分组
+        AddGroup() {
+            this.$prompt('请输入分组名', '创建分组', {
+                confirmButtonText: '创建',
+                cancelButtonText: '取消',
+                inputValidator: this.inputValidator,
+            }).then(({ value }) => {
+
+                postCreate({ name: value, username: this.$store.getters.userInfo.username, user_id: this.$store.getters.userInfo.id })
+                    .then((res) => {
+                        if (res.code == 200) {
+                            this.$message.success("创建成功")
+                            //加载好友列表
+                            this.loadFriendData()
+                            //加载分组列表
+                            this.loadGroupList()
+                        } else {
+                            this.$message.error(res.message)
+                        }
+                    })
+            })
+        },
+        //重命名分组
+        renameGroup() {
+            this.$prompt('请输入分组名', '重命名', {
+                confirmButtonText: '修改',
+                cancelButtonText: '取消',
+                inputValue: this.old_name,
+                inputValidator: this.inputValidator,
+            }).then(({ value }) => {
+                postUpdate({ name: value, old_name: this.old_name, user_id: this.$store.getters.userInfo.id })
+                    .then((res) => {
+                        if (res.code == 200) {
+                            this.$message.success("修改成功")
+                            //加载好友列表
+                            this.loadFriendData()
+                            //加载分组列表
+                            this.loadGroupList()
+                        } else {
+                            this.$message.error(res.message)
+                        }
+                    })
+            })
+        },
+        inputValidator(text) {
+            if (text) {
+                return true
+            } else {
+                return "分组名不能为空"
+            }
+        },
+        //刷新分组
+        refreshGroup() {
+            this.loadData()
         }
     },
 }
@@ -186,5 +327,12 @@ export default {
 
         }
     }
+}
+
+.menu {
+    position: fixed;
+    z-index: 1004;
+    background-color: #fff;
+    border-radius: 5px;
 }
 </style>

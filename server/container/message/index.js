@@ -28,7 +28,7 @@ async function List(req, res) {
     let data = []
     let id = req.user.id
     //获取所有好友聊天列表
-    let sql = `SELECT user_id,avatar,remark as name,f.room,msg_sta.updated_at from friend as f,(SELECT id FROM friend_group WHERE user_id=? LIMIT 1) as fp,message_statistics as msg_sta WHERE fp.id=f.group_id and f.room=msg_sta.room  ORDER BY msg_sta.updated_at DESC;`
+    let sql = `SELECT user_id,remark as name,username as receiver_username,f.room,msg_sta.updated_at from friend as f,(SELECT id FROM friend_group WHERE user_id=?) as fp,message_statistics as msg_sta WHERE fp.id=f.group_id and f.room=msg_sta.room  ORDER BY msg_sta.updated_at DESC;`
     let { err, results } = await Query(sql, [id])
     for (const index in results) {
         let item = results[index]
@@ -39,6 +39,9 @@ async function List(req, res) {
         r = await Query(sql, [item.room, id])
         results[index].lastMessage = r.results[0].lastMessage
         results[index].type = r.results[0].type
+        sql = `SELECT  avatar from user where id=?`
+        r = await Query(sql, [item.user_id])
+        results[index].avatar = r.results[0].avatar
     }
     // 处理 一开始查询结果可能为空 results的值undefined导致报错
     if (results) {
@@ -108,14 +111,13 @@ async function ChatConnect(ws, req) {
     let sql
     let resp
     if (type == 'group') {
-        sql = 'SELECT gm.nickname,m.*,u.avatar FROM (SELECT sender_id, receiver_id, content, room, media_type,message.created_at FROM message WHERE `room` =? AND `type` = ?  ORDER BY created_at ASC) AS m LEFT JOIN user as u ON u.`id`=m.`sender_id` LEFT JOIN group_members as gm on gm.group_id=? and user_id=u.`id`'
+        sql = 'SELECT gm.nickname,m.*,u.avatar FROM (SELECT sender_id, receiver_id, content, room, media_type,message.created_at FROM message WHERE `room` =? AND `type` = ?) AS m LEFT JOIN user as u ON u.`id`=m.`sender_id` LEFT JOIN group_members as gm on gm.group_id=? and user_id=u.`id` ORDER BY created_at ASC'
         resp = await Query(sql, [room, type, id])
     } else {
         sql = 'SELECT m.*,u.avatar FROM (SELECT sender_id, receiver_id, content, room, media_type,message.created_at FROM message WHERE `room` =? AND `type` = ?  ORDER BY created_at ASC) AS m LEFT JOIN user as u ON u.`id`=m.`sender_id`'
         resp = await Query(sql, [room, type])
     }
     let results = resp.results
-    console.log(results);
     let histroyMsg = results.map((item) => {
         return {
             "sender_id": item.sender_id,

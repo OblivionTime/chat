@@ -164,7 +164,6 @@ export default {
             this.receiver_id = this.options.group_id
             this.name = this.options.name
             this.initSocket()
-            this.initRTCSocket()
             this.chatList = []
 
             setTimeout(() => {
@@ -188,7 +187,6 @@ export default {
                 this.receiver_id = this.options.user_id
                 this.name = this.options.name
                 this.initSocket()
-                // this.initRTCSocket()
                 this.chatList = []
                 setTimeout(() => {
                     this.containerAni = 'opacity:1'
@@ -428,52 +426,12 @@ export default {
          */
         //发送语音邀请
         SendAudioInvitation() {
-            if (this.callActive) {
-                return this.$message.error("正在通话中....")
-            }
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'audio' });
+           this.$message.warning("音视频正在开发中.....")
         },
         //发送视频邀请
         SendVideoInvitation() {
-            if (this.callActive) {
-                return this.$message.error("正在通话中....")
-            }
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 0, method: 'video' });
+            this.$message.warning("音视频正在开发中.....")
         },
-        //监听别人打语音视频电话
-        initRTCSocket() {
-            if (this.rtcsocket) {
-                this.rtcsocket.close()
-                this.rtcsocket = null
-            }
-            this.rtcsocket = new WebSocket(`${this.wssaddress}/api/chat/v1/rtc/chat?room=${this.room}&username=${this.username}_listen&type=group`)
-            const { ipcRenderer } = window.require('electron');
-            this.rtcsocket.onmessage = (message) => {
-                let data = JSON.parse(message.data)
-                switch (data.name) {
-                    case 'status':
-                        this.callActive = data.flag
-                        break
-                    case 'reject':
-                        this.callActive = false
-                        break
-                    case "audio_invitation":
-                        if (this.callActive) {
-                            return
-                        }
-                        ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 1, method: 'audio' });
-                        break;
-                    case "video_invitation":
-                        if (this.callActive) {
-                            return
-                        }
-                        ipcRenderer.send('open-window', { room: this.room, receiver: this.name, beInviter: 1, method: 'video' });
-                        break;
-                }
-            }
-        }
     },
     destroyed() {
         if (this.rtcsocket) {

@@ -35,7 +35,7 @@ export default {
     data() {
         return {
             ChatList: [],
-            currentRoom: '',
+            currentRoom: -1,
             timer: '',
             cureentGroup: false,
         };
@@ -75,7 +75,10 @@ export default {
         },
         //选择房间
         chooseRoom(item) {
-
+            if (item.AI) {
+                this.$emit('chooseRoom', item);
+                return
+            }
             if (item.group_id) {
                 this.cureentGroup = true
                 this.currentRoom = item.group_id
@@ -84,6 +87,10 @@ export default {
                 this.currentRoom = item.user_id
             }
             this.$emit('chooseRoom', item);
+        },
+        //修改currentRoom
+        updatecurrentRoom(id) {
+            this.currentRoom = id
         },
         //解析最后一条消息
         ParseMessage(item) {

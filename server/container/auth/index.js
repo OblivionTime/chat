@@ -275,19 +275,47 @@ function initUserNotification(ws, req) {
     let url = req.url.split("?")[1];
     let params = new URLSearchParams(url)
     let username = params.get("username")
+    //音视频状态,用户
+    var status = false
     //如果用户已经登录则强制退出当前用户
     if (LoginRooms[username]) {
-        ws.close()
+        LoginRooms[username].send(JSON.stringify({ name: "logout" }))
+        LoginRooms[username].close()
     }
     LoginRooms[username] = ws
     ws.on('message', function (Resp_data) {
         let data = JSON.parse(Resp_data)
         //接收者
         let receiver_username = data.receiver_username
+        if (data.name == 'audio' || data.name == 'video') {
+            if (!LoginRooms[receiver_username]) {
+                ws.send(JSON.stringify({ name: "reject", message: "对方当前不在线!!!" }))
+                return
+            }
+            //当用户已经在音视频通话了则需要告知发送方
+            if (status) {
+                ws.send(JSON.stringify({ name: "reject", message: "你正在通话中,请勿发送其他通话请求...." }))
+                return
+            } else {
+                status = true
+            }
+            //对方在线
+            if (LoginRooms[receiver_username]) {
+                LoginRooms[receiver_username].send(Resp_data)
+                data.method = data.name
+                data.name = 'peer'
+                ws.send(JSON.stringify(data))
+                return
+            }
+        }
+        //拒绝通话
+        if (data.name == 'reject') {
+            status = false
+            return
+        }
         //对方在线
         if (LoginRooms[receiver_username]) {
             LoginRooms[receiver_username].send(Resp_data)
-
         }
     });
     ws.on('close', function () {

@@ -7,14 +7,14 @@
                     style="width: 100px;height: 100px;object-fit: cover;object-position: center;">
             </div>
             <div class="audio-choses" v-if="beInviter && !flag">
-                <div style="color: white;">{{ receiver }}发起语音通话</div>
+                <div style="color: white;">{{ username }}对你发起语音通话</div>
                 <div>
                     <img src="../../assets/chat/accept.png" alt="" width="50" @click="acceptAudio">
                     <img src="../../assets/chat/reject.png" alt="" width="50" @click="rejectAudio">
                 </div>
             </div>
             <div class="audio-Inviter" v-if="!beInviter && !flag">
-                <div style="color: white;">对{{ receiver }}发起语音通话</div>
+                <div style="color: white;">你对{{ username }}发起语音通话</div>
                 <img src="../../assets/chat/reject.png" alt="" width="50" @click="rejectAudio">
             </div>
             <div class="audio-accept" v-if="flag">
@@ -64,16 +64,21 @@ export default {
             beInviter: false,
             room: "",
             socket: "",
-            receiver: "",
+            username: "",
             localStream: "",
             pc: "",
             broadcastTime: 0,
-            timer: ""
+            timer: "",
+            receiver: ""
         };
     },
     created() {
         this.beInviter = this.$route.query.beInviter == 1
-        this.receiver = this.$route.query.receiver
+        if (this.beInviter) {
+            this.username = this.$route.query.sender
+        } else {
+            this.username = this.$route.query.receiver
+        }
         this.room = this.$route.query.room
 
     },
@@ -95,7 +100,7 @@ export default {
                 }))
                 this.socket.close()
             }
-        }, 6000);
+        }, 60 * 1000);
     },
     methods: {
         //初始化websocket
@@ -151,7 +156,7 @@ export default {
                                         data: {
                                             sdp: session_desc,
                                         },
-                                        receiver: this.receiver,
+                                        receiver: this.username,
                                     })
                                 )
                             }, (err) => {
@@ -171,8 +176,8 @@ export default {
                         this.pc.addIceCandidate(candidate);
                         break
                     case 'reject':
-                        this.flag = false
                         this.$message.warning("对方已挂断,即将退出")
+                        this.socket.send(JSON.stringify({ name: "reject" }))
                         this.socket.close()
                         this.socket = null
                         setTimeout(() => {
@@ -182,6 +187,11 @@ export default {
                     default:
                         break;
                 }
+            }
+            this.socket.onclose = () => {
+                setTimeout(() => {
+                    win.close()
+                }, 1000);
             }
         },
         //接收情况
@@ -242,7 +252,7 @@ export default {
                         data: {
                             sdp: session_desc,
                         },
-                        receiver: this.receiver,
+                        receiver: this.username,
                     })
                 );
             };
@@ -261,7 +271,7 @@ export default {
                                 sdpMLineIndex: evt.candidate.sdpMLineIndex,
                                 candidate: evt.candidate.candidate,
                             },
-                            receiver: this.receiver,
+                            receiver: this.username,
                         })
                     );
                 }
@@ -353,7 +363,7 @@ export default {
 
         .audio-Inviter {
             margin-top: 30px;
-            width: 200px;
+            min-width: 200px;
             display: flex;
             align-items: center;
             justify-content: center;

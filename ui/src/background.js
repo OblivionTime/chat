@@ -10,7 +10,6 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 const isDevelopment = process.env.NODE_ENV !== 'production'
-
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
@@ -39,7 +38,7 @@ async function createWindow() {
   if (isDevelopment) {
     win.webContents.openDevTools()
   } else {
-    win.setMenu(null);
+    // win.setMenu(null);
     createProtocol('app')
   }
   win.loadURL(winURL)
@@ -69,14 +68,15 @@ ipcMain.on('open-window', (event, options) => {
   })
   // new_win.webContents.openDevTools()
   // new_win.setMenu(null);
-  if(isDevelopment){
+  if (isDevelopment) {
     new_win.webContents.openDevTools()
   }
-  let { room, receiver, beInviter } = options
+  let { room, sender, receiver, beInviter } = options
+  console.log(options);
   if (options.method == 'audio') {
-    new_win.loadURL(winURL + `audio?room=${room}&receiver=${receiver}&beInviter=${beInviter}`);
+    new_win.loadURL(winURL + `audio?room=${room}&sender=${sender}&receiver=${receiver}&beInviter=${beInviter}`);
   } else {
-    new_win.loadURL(winURL + `video?room=${room}&receiver=${receiver}&beInviter=${beInviter}`);
+    new_win.loadURL(winURL + `video?room=${room}&sender=${sender}&receiver=${receiver}&beInviter=${beInviter}`);
 
   }
 });

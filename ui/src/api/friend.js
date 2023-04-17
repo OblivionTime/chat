@@ -24,3 +24,39 @@ export function getSearch(params) {
         params
     })
 }
+//获取好友信息
+export function getFriend_info(params) {
+    return request({
+        url: '/friend/info',
+        method: 'get',
+        params
+    })
+}
+export function getFriendGroup_list(params) {
+    return request({
+        url: '/friend/group_list',
+        method: 'get',
+        params
+    })
+}
+export function postCreate(data) {
+    return request({
+        url: '/friend/create',
+        method: 'post',
+        data
+    })
+}
+export function postUpdate(data) {
+    return request({
+        url: '/friend/update',
+        method: 'post',
+        data
+    })
+}
+export function postUpdate_friend(data) {
+    return request({
+        url: '/friend/update_friend',
+        method: 'post',
+        data
+    })
+}

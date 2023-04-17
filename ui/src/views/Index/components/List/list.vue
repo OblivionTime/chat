@@ -16,7 +16,7 @@
 
         </div>
         <div class="contact-list" v-else>
-            <Contact v-if="current == 'contact'" ref="contact"></Contact>
+            <Contact v-if="current == 'contact'" ref="contact" @showFriendInfo="showFriendInfo"></Contact>
 
         </div>
         <el-dialog :visible.sync="showAddDialog" width="600px" custom-class="add-dialog" top="25vh">
@@ -253,9 +253,9 @@ export default {
                         .then((res) => {
                             if (res.code == 200) {
                                 this.$message.success("添加成功")
-                                this.$refs.contact.loadFriendData()
+                                // this.$refs.contact.loadFriendData()
                                 this.showAddDialog = false
-                                this.$emit('ListCHangeStatus', 'chat');
+                                this.$emit('ListChangeStatus', 'chat');
                             } else {
                                 this.$message.error(res.message)
                             }
@@ -283,13 +283,16 @@ export default {
                         .then((res) => {
                             if (res.code == 200) {
                                 this.$message.success("加入成功")
-                                this.$emit('ListCHangeStatus', 'chat');
+                                this.$emit('ListChangeStatus', 'chat');
                                 this.$refs.contact.loadGroupData()
                             } else {
                                 this.$message.error(res.message)
                             }
                         })
                 })
+        },
+        updatecurrentRoom(id) {
+            this.$refs.chat.updatecurrentRoom(id)
         },
         /**
          * 添加群聊相关 
@@ -371,7 +374,7 @@ export default {
                         this.$message.success("创建成功")
                         this.showCreateDialog = false
                         this.$refs.contact.loadGroupData()
-                        this.$emit('ListCHangeStatus', 'chat');
+                        this.$emit('ListChangeStatus', 'chat');
                     } else {
                         this.$message.error(res.message)
                     }
@@ -405,8 +408,14 @@ export default {
         //去聊天
         toChat() {
             this.current = 'chat'
-            this.$emit('ListCHangeStatus', 'chat');
+            this.$emit('ListChangeStatus', 'chat');
             this.showAddDialog = false;
+        },
+        /**
+         * 好友详情相关方法
+         */
+        showFriendInfo(item) {
+            this.$emit('showFriendInfo', item)
         }
     },
 }
