@@ -155,7 +155,6 @@ export default {
     },
     created() {
         if (this.options) {
-            console.log(this.options);
             this.sendType = localStorage.getItem('sendType') ? localStorage.getItem('sendType') : 'enter'
             this.containerAni = 'opacity:0'
             this.empty = false
@@ -455,7 +454,7 @@ export default {
     height: 100vh;
     overflow: hidden;
     background-color: #eee;
-    transition: opacity 1s linear;
+    transition: opacity 0.5s linear;
     opacity: 0;
 
     .header {

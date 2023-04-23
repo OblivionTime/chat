@@ -161,7 +161,13 @@ async function AddFriend(req, res) {
     await Query(sql, { room: uuid, total: 1 })
     //通知对方,让其好友列表进行更新
     NotificationUser({ receiver_username: username, name: "friend" })
-    return RespSuccess(res)
+    let options = {
+        room: uuid,
+        user_id: usr2.results[0].user_id,
+        name: username,
+        receiver_name: username
+    }
+    return RespData(res,options)
 }
 /**
  * 查询用户
@@ -258,7 +264,7 @@ async function getFriendGroupList(req, res) {
     RespData(res, results)
 }
 /**
- * 修改好友分组
+ * 重命名好友分组
  */
 async function updateFriendGroup(req, res) {
     const { name, user_id, old_name } = req.body

@@ -113,8 +113,8 @@ const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
 import { EmojiList } from '@/utils/emoji';
 import { toggleTime } from '@/utils/timeFormat';
-import { getFileSuffix2, getFileSuffix, getFileIcons, getFileName } from '@/utils/file'
-
+import { getFileSuffix2, getFileIcons, getFileName } from '@/utils/file'
+import { getGroup_Members_list } from '@/api/group';
 export default {
 
     props: {
@@ -149,7 +149,8 @@ export default {
             currentVideo: "",
             callActive: false,
             rtcsocket: "",
-            rtcTimer: ""
+            rtcTimer: "",
+            userList: []
         };
     },
     created() {
@@ -163,6 +164,7 @@ export default {
             this.room = this.options.room
             this.receiver_id = this.options.group_id
             this.name = this.options.name
+            this.loadData()
             this.initSocket()
             this.chatList = []
 
@@ -178,14 +180,16 @@ export default {
                 return
             }
             if (this.options) {
+                this.sendType = localStorage.getItem('sendType') ? localStorage.getItem('sendType') : 'enter'
                 this.containerAni = 'opacity:0'
                 this.empty = false
                 this.sender_id = this.$store.getters.userInfo.id
                 this.username = this.$store.getters.userInfo.username
                 this.avatar = this.$store.getters.userInfo.avatar
                 this.room = this.options.room
-                this.receiver_id = this.options.user_id
+                this.receiver_id = this.options.group_id
                 this.name = this.options.name
+                this.loadData()
                 this.initSocket()
                 this.chatList = []
                 setTimeout(() => {
@@ -227,6 +231,14 @@ export default {
         },
         closeWindow() {
             win.close()
+        },
+        loadData() {
+            getGroup_Members_list({ group_id: this.receiver_id })
+                .then((res) => {
+                    if (res.code == 200) {
+                        this.userList = res.data
+                    }
+                })
         },
         /**
          * websocket建立连接
@@ -426,11 +438,11 @@ export default {
          */
         //发送语音邀请
         SendAudioInvitation() {
-           this.$message.warning("音视频正在开发中.....")
+            this.$emit("sendGroupInvitation", { room: this.room, sender: this.username, group_id: this.receiver_id, userList: this.userList, beInviter: 0, method: 'group_audio' })
         },
         //发送视频邀请
         SendVideoInvitation() {
-            this.$message.warning("音视频正在开发中.....")
+            this.$emit("sendGroupInvitation", { room: this.room, sender: this.username, group_id: this.receiver_id, userList: this.userList, beInviter: 0, method: 'group_video' })
         },
     },
     destroyed() {
@@ -451,7 +463,7 @@ export default {
     height: 100vh;
     overflow: hidden;
     background-color: #eee;
-    transition: opacity 1s linear;
+    transition: opacity 0.5s linear;
     opacity: 0;
 
     .header {

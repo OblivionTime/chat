@@ -32,6 +32,15 @@ const routes = [
     path: '/video',
     name: 'video',
     component: () => import(/* webpackChunkName: "about" */ '@/views/audioVideo/video')
+  },  {
+    path: '/group_audio',
+    name: 'group_audio',
+    component: () => import(/* webpackChunkName: "about" */ '@/views/audioVideo/group_audio')
+  },
+  {
+    path: '/group_video',
+    name: 'group_video',
+    component: () => import(/* webpackChunkName: "about" */ '@/views/audioVideo/group_video')
   }
 ]
 

@@ -19,7 +19,7 @@
                             <input type="text" placeholder="服务器地址" v-model="proxyaddress">
                         </div>
                         <div style="text-align: center;margin-top: 20px;">
-                            <el-button style="width: 45%;">取消</el-button>
+                            <el-button style="width: 45%;" @click="showSettingsDialog = false">取消</el-button>
                             <el-button type="primary" style="width: 45%;" @click="SaveBasic">保存配置</el-button>
                         </div>
                     </div>

@@ -3,7 +3,7 @@ let { RespUserOrPassErr, RespParamErr, RespServerErr, RespUserExitErr, RespUpdat
 const { Query } = require('../../db/query');
 const { getConversation } = require('../../utils/newBing');
 const { v4: uuidv4 } = require('uuid');
-let rooms = {}
+let bing_rooms = {}
 /**
  *  生成Conversation
  *  1.获取当前登录的用户名,并获取到前端传来的代理服务器地址
@@ -104,7 +104,7 @@ async function BingConnect(ws, req) {
     let url = req.url.split("?")[1];
     let params = new URLSearchParams(url)
     let room = params.get("room")
-    rooms[room] = ws
+    bing_rooms[room] = ws
     //获取所有聊天记录
     let sql = 'SELECT m.*,u.avatar FROM (SELECT sender_id, receiver_id, content, room, link_list,ai_message.created_at,invocation_id FROM ai_message WHERE `room` =? ORDER BY created_at ASC) AS m LEFT JOIN user as u ON u.`id`=m.`sender_id`'
     let { err, results } = await Query(sql, [room])
@@ -133,8 +133,8 @@ async function BingConnect(ws, req) {
             sql = `update  ai_conversation set count=?  where conversation_id=? and conversation_signature=?`
             await Query(sql, [message.numUserMessagesInConversation, message.conversation_id, message.conversation_signature])
             if (message.numUserMessagesInConversation == 20) {
-                if (rooms[room]) {
-                    rooms[room].send(JSON.stringify({ "name": "reset" }))
+                if (bing_rooms[room]) {
+                    bing_rooms[room].send(JSON.stringify({ "name": "reset" }))
                 }
             }
             return

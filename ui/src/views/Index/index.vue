@@ -2,12 +2,16 @@
     <div class="container">
         <SideBar @changeStatus="changeStatus" ref="SideBar" @getAIoptions="getAIoptions"></SideBar>
         <List :current="current" ref="List" @ListChangeStatus="ListChangeStatus" @chooseRoom="chooseRoom"
-            @showFriendInfo="showFriendInfo"></List>
+            @showFriendInfo="showFriendInfo" @showGroupInfo="showGroupInfo" @sendFriendMessage="sendFriendMessage"
+            @sendGroupMessage="sendGroupMessage" @ShowinvitationFriend="ShowinvitationFriend"></List>
         <chatRoom :options="options" @updateList="updateList" @sendInvitation="sendInvitation" v-if="currentRoom == 'chat'">
         </chatRoom>
-        <groupRoom :options="groupOptions" @updateList="updateList" v-if="currentRoom == 'group'"></groupRoom>
+        <groupRoom :options="groupOptions" @updateList="updateList" @sendGroupInvitation="sendGroupInvitation"
+            v-if="currentRoom == 'group'"></groupRoom>
         <AIRoom :options="AIoptions" v-if="currentRoom == 'ai'"></AIRoom>
         <Info :options="friendoptions" v-if="currentRoom == 'info'" @sendFriendMessage="sendFriendMessage"></Info>
+        <Group :group_id="groupInfooptions" v-if="currentRoom == 'group_info'" @sendGroupMessage="sendGroupMessage"
+            @ShowinvitationFriend="ShowinvitationFriend"></Group>
     </div>
 </template>
 
@@ -21,6 +25,7 @@ import chatRoom from './components/Room/chatRoom.vue'
 import AIRoom from './components/Room/AIRoom.vue'
 import groupRoom from './components/Room/groupRoom.vue'
 import Info from './components/Room/Info.vue'
+import Group from './components/Room/group.vue'
 import { getConversationInfo } from '@/api/bing';
 const remote = window.require('electron').remote;
 const win = remote.getCurrentWindow();
@@ -33,7 +38,8 @@ export default {
         chatRoom,
         AIRoom,
         groupRoom,
-        Info
+        Info,
+        Group
     },
 
     data() {
@@ -64,7 +70,8 @@ export default {
             /**
              *  好友信息或群聊相关参数 
              */
-            friendoptions: ""
+            friendoptions: "",
+            groupInfooptions: ""
         };
     },
     created() {
@@ -116,6 +123,38 @@ export default {
                         }
                         ipcRenderer.send('open-window', options);
                         break
+                    //群聊音视频
+                    case "group_audio":
+                        options = {
+                            method: data.name,
+                            room: data.room,
+                            sender: data.sender_name,
+                            group_id: data.group_id,
+                            beInviter: 1
+                        }
+                        ipcRenderer.send('open-window', options);
+                        break;
+                    //群聊音视频
+                    case "group_video":
+                        options = {
+                            method: data.name,
+                            room: data.room,
+                            sender: data.sender_name,
+                            group_id: data.group_id,
+                            beInviter: 1
+                        }
+                        ipcRenderer.send('open-window', options);
+                        break;
+                    case "group_peer":
+                        options = {
+                            method: data.method,
+                            room: data.room,
+                            sender: data.sender_name,
+                            group_id: data.group_id,
+                            beInviter: 0
+                        }
+                        ipcRenderer.send('open-window', options);
+                        break
                     //音视频相应
                     case "peer":
                         options = {
@@ -146,6 +185,19 @@ export default {
         //音视频邀请
         sendInvitation(options) {
             this.socket.send(JSON.stringify({ name: options.method, sender_name: options.sender, receiver_username: options.receiver, room: options.room, beInviter: options.beInviter }))
+        },
+        //群聊音视频邀请
+        sendGroupInvitation(options) {
+            this.socket.send(JSON.stringify({
+                name: options.method,
+                userList: this.userList,
+                sender_name: options.sender,
+                group_id: options.group_id,
+                userList: options.userList,
+                room: options.room,
+                beInviter: options.beInviter
+            }))
+
         },
         //改变侧边栏选项
         changeStatus(tag) {
@@ -195,6 +247,27 @@ export default {
             this.$nextTick(() => {
                 this.$refs.List.updatecurrentRoom(item.user_id)
             });
+        },
+        /**
+         * 群聊相关
+         */
+        //显示群聊信息
+        showGroupInfo(item) {
+            this.currentRoom = 'group_info'
+            this.groupInfooptions = item
+        },
+        //去群聊
+        sendGroupMessage(item) {
+            this.currentRoom = 'group'
+            this.ListChangeStatus("chat")
+            this.groupOptions = item
+            this.$nextTick(() => {
+                this.$refs.List.updatecurrentRoom(undefined, item.group_id)
+            });
+        },
+        //邀请好友
+        ShowinvitationFriend(group_id) {
+            this.$refs.List.ShowinvitationFriend(group_id)
         },
         /**
          * bing相关方法

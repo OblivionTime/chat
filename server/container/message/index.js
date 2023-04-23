@@ -63,8 +63,8 @@ async function List(req, res) {
         results2[index].unreadCount = 0
         sql = `SELECT  content as lastMessage,media_type as type FROM message WHERE room=? ORDER BY created_at DESC LIMIT 1`
         r = await Query(sql, [item.room, id])
-        results2[index].lastMessage = r.results[0].lastMessage
-        results2[index].type = r.results[0].type
+        results2[index].lastMessage = r.results[0]?.lastMessage
+        results2[index].type = r.results[0]?.type
     }
     if (results2.length > 0) {
         data.push(...results2)

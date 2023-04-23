@@ -16,7 +16,8 @@
 
         </div>
         <div class="contact-list" v-else>
-            <Contact v-if="current == 'contact'" ref="contact" @showFriendInfo="showFriendInfo"></Contact>
+            <Contact v-if="current == 'contact'" ref="contact" @showFriendInfo="showFriendInfo"
+                @openCreateDialog="openCreateDialog" @showGroupInfo="showGroupInfo" @ShowinvitationFriend="ShowinvitationFriend"></Contact>
 
         </div>
         <el-dialog :visible.sync="showAddDialog" width="600px" custom-class="add-dialog" top="25vh">
@@ -36,7 +37,7 @@
                                 <div class="list-item-desc">
                                     <p class="list-item-username">{{ item.name }}({{ item.username }})</p>
                                     <button v-if="!item.status" @click="addFriend(item.username, item.id)">加好友</button>
-                                    <button v-else @click="toChat">去聊天</button>
+                                    <span  v-if="item.status" style="font-size: 12px;color: red;">已经是好友</span>
                                 </div>
                             </div>
                         </div>
@@ -57,7 +58,8 @@
                             <div class="list-item-desc">
                                 <p class="list-item-username">{{ item.name }} ({{ item.number }}人)</p>
                                 <button v-if="!item.status" @click="joinGroup(item.name, item.group_id)">加入群聊</button>
-                                <button v-else>去聊天</button>
+                                <span  v-if="item.status" style="font-size: 12px;color: red;">已加入群聊</span>
+
                             </div>
                         </div>
                     </div>
@@ -65,7 +67,7 @@
                 </el-tab-pane>
             </el-tabs>
         </el-dialog>
-        <el-dialog :visible.sync="showCreateDialog" width="660px" custom-class="create-dialog" top="20px">
+        <el-dialog title="创建群聊" :visible.sync="showCreateDialog" width="660px" custom-class="create-dialog" top="20px">
             <div class="create-step-first" :style="create_ani" v-if="!step">
                 <div class="members-chooses">
                     <div class="all-friend">
@@ -134,6 +136,52 @@
                 </div>
             </div>
         </el-dialog>
+        <el-dialog title="邀请好友" :visible.sync="showInvitationDialog" width="660px" custom-class="create-dialog" top="20px">
+            <div class="create-step-first">
+                <div class="members-chooses">
+                    <div class="all-friend">
+                        <div class="header">
+                            好友列表
+                        </div>
+                        <el-tree :data="FriendTree" :props="defaultProps" show-checkbox @check="CheckChange2" ref="tree2">
+                            <div slot-scope="{ node, data }">
+                                <div v-if="data.children">
+                                    {{ node.label }} {{ data.len + '/' + data.len }}
+                                </div>
+                                <div v-else class="tree-item">
+                                    <div class="tree-item-avatar">
+                                        <img :src="data.avatar ? getAvatarPath(data.avatar) : require('@/assets/logo.png')"
+                                            alt="" width="30" height="30" style="object-fit: cover;">
+                                    </div>
+                                    <div class="tree-item-info">
+                                        {{ node.label }}
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </el-tree>
+                    </div>
+                    <div class="members-the-select">
+                        <div class="header">
+                            邀请成员列表
+                        </div>
+                        <div v-for="item in invitationList" :key="item.id" class="members-the-select-item">
+                            <div class="members-the-select-avatar">
+                                <img :src="item.avatar ? getAvatarPath(item.avatar) : require('@/assets/logo.png')" alt=""
+                                    width="45" height="45" style="object-fit: cover;">
+                            </div>
+                            <div class="members-the-select-avatar-info">
+                                {{ item.name }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;text-align: right;">
+                    <el-button type="primary" @click="toCompleteInvitation">邀请</el-button>
+                </div>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -142,7 +190,7 @@
 import Chat from './chat.vue';
 import Contact from './contact.vue';
 import { getFriend_list, postAdd_friend, getSearch } from '@/api/friend';
-import { postCreate_group, getGroupSearch, getJoin } from '@/api/group';
+import { postCreate_group, getGroupSearch, getJoin, postGroupInvitation } from '@/api/group';
 export default {
     name: "List",
     components: {
@@ -185,6 +233,13 @@ export default {
                 "announcement": "",
                 "members": []
             },
+            //邀请好友
+            showInvitationDialog: false,
+            invitationList: [],
+            invitationformData: {
+                invitationList: [],
+                group_id: 0,
+            },
             showUploadList: true,
             create_ani: "",
             create_ani2: "",
@@ -202,7 +257,7 @@ export default {
             this.groupList = []
 
         },
-
+        //搜索好友/群聊
         searchData(t) {
             if (t == 'friend') {
                 if (!this.username) {
@@ -232,6 +287,7 @@ export default {
                     })
             }
         },
+        //添加好友
         addFriend(username, id) {
             const h = this.$createElement;
             this.$msgbox({
@@ -253,15 +309,15 @@ export default {
                         .then((res) => {
                             if (res.code == 200) {
                                 this.$message.success("添加成功")
-                                // this.$refs.contact.loadFriendData()
                                 this.showAddDialog = false
-                                this.$emit('ListChangeStatus', 'chat');
+                                this.$emit('sendFriendMessage', res.data);
                             } else {
                                 this.$message.error(res.message)
                             }
                         })
                 })
         },
+        //加入群聊
         joinGroup(name, group_id) {
             const h = this.$createElement;
             this.$msgbox({
@@ -269,7 +325,7 @@ export default {
                 message: h('p', null, [
                     h('span', null, '你是否要加入'),
                     h('span', { style: 'color: #51cf66' }, name),
-                    h('span', null, '为好友?'),
+                    h('span', null, '群聊?'),
                 ]),
                 showCancelButton: true,
                 confirmButtonText: '添加',
@@ -283,50 +339,47 @@ export default {
                         .then((res) => {
                             if (res.code == 200) {
                                 this.$message.success("加入成功")
-                                this.$emit('ListChangeStatus', 'chat');
-                                this.$refs.contact.loadGroupData()
+                                this.$emit('sendGroupMessage', res.data);
                             } else {
                                 this.$message.error(res.message)
                             }
                         })
                 })
         },
-        updatecurrentRoom(id) {
-            this.$refs.chat.updatecurrentRoom(id)
+        updatecurrentRoom(user_id,group_id) {
+            this.$refs.chat.updatecurrentRoom(user_id,group_id)
         },
         /**
          * 添加群聊相关 
          * */
-        openCreateDialog() {
-            this.loadFriendData()
+        async openCreateDialog() {
+            await this.loadFriendData()
+            this.showCreateDialog = true;
+            this.formData = {
+                "name": "",
+                "avatar": "",
+                "announcement": "",
+                "members": []
+            }
+            this.step = false
+            this.create_ani = ""
+            this.create_ani2 = ""
+            this.showUploadList = true
         },
         //加载所有好友
-        loadFriendData() {
-            getFriend_list()
-                .then((res) => {
-                    if (res.code == 200) {
-                        let FriendTree = []
-                        for (const item of res.data) {
-                            let friend = { label: item.name, children: [], len: item.friend.length }
-                            for (const f of item.friend) {
-                                friend.children.push({ label: f.remark, value: f.user_id, avatar: f.avatar })
-                            }
-                            FriendTree.push(friend)
-                        }
-                        this.FriendTree = FriendTree
+        async loadFriendData() {
+            let res = await getFriend_list()
+            if (res.code == 200) {
+                let FriendTree = []
+                for (const item of res.data) {
+                    let friend = { label: item.name, children: [], len: item.friend.length }
+                    for (const f of item.friend) {
+                        friend.children.push({ label: f.remark, value: f.user_id, avatar: f.avatar })
                     }
-                    this.showCreateDialog = true;
-                    this.formData = {
-                        "name": "",
-                        "avatar": "",
-                        "announcement": "",
-                        "members": []
-                    }
-                    this.step = false
-                    this.create_ani = ""
-                    this.create_ani2 = ""
-                    this.showUploadList = true
-                })
+                    FriendTree.push(friend)
+                }
+                this.FriendTree = FriendTree
+            }
         },
         //当复选框被修改
         CheckChange() {
@@ -373,8 +426,7 @@ export default {
                     if (res.code == 200) {
                         this.$message.success("创建成功")
                         this.showCreateDialog = false
-                        this.$refs.contact.loadGroupData()
-                        this.$emit('ListChangeStatus', 'chat');
+                        this.$emit('sendGroupMessage', res.data);
                     } else {
                         this.$message.error(res.message)
                     }
@@ -412,11 +464,62 @@ export default {
             this.showAddDialog = false;
         },
         /**
-         * 好友详情相关方法
+         * 好友/群聊详情相关方法
          */
         showFriendInfo(item) {
             this.$emit('showFriendInfo', item)
-        }
+        },
+        showGroupInfo(item) {
+            this.$emit('showGroupInfo', item)
+        },
+        async ShowinvitationFriend(group_id) {
+            await this.loadFriendData()
+            this.invitationList = []
+            this.invitationformData = {
+                group_id,
+                invitationList: []
+            }
+            this.showInvitationDialog = true
+
+        },
+        CheckChange2() {
+            let invitationList = []
+            let checkList = this.$refs.tree2.getCheckedNodes()
+            for (const item of checkList) {
+                if (item.children && item.children.length >= 0) {
+                    continue
+                }
+                invitationList.push({ id: item.value, name: item.label, avatar: item.avatar })
+            }
+            this.invitationList = invitationList
+        },
+        //完成邀请
+        toCompleteInvitation() {
+            if (this.invitationList.length == 0) {
+                return this.$message.warning("请选择成员后在邀请!!!")
+            }
+            for (const { id } of this.invitationList) {
+                this.invitationformData.invitationList.push(id)
+            }
+            postGroupInvitation(this.invitationformData)
+                .then((res) => {
+                    if (res.code == 200) {
+                        this.$message.success("邀请成功")
+                        this.showInvitationDialog = false
+                        this.$refs.contact.loadGroupData()
+                    } else {
+                        this.$message.error(res.message)
+                    }
+                })
+
+        },
+        //获取头像地址
+        getAvatarPath(content) {
+            if (content.includes("upload")) {
+                return this.ipaddress + content
+            }
+            return content
+        },
     },
 }
 </script>
