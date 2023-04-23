@@ -4,7 +4,7 @@
  * @Autor: solid
  * @Date: 2022-08-12 14:21:50
  * @LastEditors: solid
- * @LastEditTime: 2022-10-10 20:35:01
+ * @LastEditTime: 2023-04-23 17:18:35
  */
 'use strict'
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
@@ -26,6 +26,7 @@ async function createWindow() {
     icon: "./assets/logo.png",
     width: 400,
     useContentSize: true,
+    autoHideMenuBar:true,
     height: 320,
     webPreferences: {
       nodeIntegration: true,
@@ -36,7 +37,7 @@ async function createWindow() {
   })
   win.center()
   if (isDevelopment) {
-    win.webContents.openDevTools()
+    // win.webContents.openDevTools()
   } else {
     // win.setMenu(null);
     createProtocol('app')
@@ -54,10 +55,21 @@ ipcMain.on('resize-window', (event, { width, height }) => {
   }
 });
 ipcMain.on('open-window', (event, options) => {
+  let title
+  if (options.method == 'video') {
+    title = "视频"
+  } else if (options.method == 'audio') {
+    title = "语音"
+  } else if (options.method == 'group_audio') {
+    title = "群语音"
+  } else if (options.method == 'group_video') {
+    title = "群视频"
+  }
   let new_win = new BrowserWindow({
-    title: options.method == 'video' ? "视频" : "语音" + "通话",
+    title: title,
     width: 600,
     useContentSize: true,
+    autoHideMenuBar:true,
     height: 400,
     icon: "./assets/logo.png",
     webPreferences: {
@@ -66,17 +78,19 @@ ipcMain.on('open-window', (event, options) => {
       contextIsolation: false
     },
   })
-  // new_win.webContents.openDevTools()
-  // new_win.setMenu(null);
-  if (isDevelopment) {
-    new_win.webContents.openDevTools()
+  if (!isDevelopment) {
+    new_win.setMenu(null);
   }
+  // new_win.webContents.openDevTools()
   let { room, sender, receiver, beInviter } = options
-  console.log(options);
   if (options.method == 'audio') {
     new_win.loadURL(winURL + `audio?room=${room}&sender=${sender}&receiver=${receiver}&beInviter=${beInviter}`);
-  } else {
+  } else if (options.method == 'video') {
     new_win.loadURL(winURL + `video?room=${room}&sender=${sender}&receiver=${receiver}&beInviter=${beInviter}`);
+  } else if (options.method == 'group_audio') {
+    new_win.loadURL(winURL + `group_audio?room=${room}&sender=${sender}&group_id=${options.group_id}&beInviter=${beInviter}`);
+  } else if (options.method == 'group_video') {
+    new_win.loadURL(winURL + `group_video?room=${room}&sender=${sender}&group_id=${options.group_id}&beInviter=${beInviter}`);
 
   }
 });

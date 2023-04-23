@@ -9,7 +9,7 @@ module.exports = {
 };
 const jwt = require('jsonwebtoken');
 const secretKey = 'xWbiNA3FqnK77MnVCj5CAcfA-VlXj7xoQLd1QaAme6l_t0Yp1TdHbSw';
-let rooms = {}
+let codeRooms = {}
 let { RespUserOrPassErr, RespParamErr, RespServerErr, RespUserExitErr, RespUpdateErr, RespUserNotExitErr } = require('../../model/error');
 const { RespData, RespSuccess } = require('../../model/resp');
 const { Query } = require('../../db/query');
@@ -189,10 +189,10 @@ function LoginCode(ws, req) {
     let room = params.get("room")
     let name = params.get("name")
     if (name == 'device') {
-        rooms[room] = {}
-        rooms[room][name] = ws
-    } else if (rooms[room] && name == 'user') {
-        rooms[room][name] = ws
+        codeRooms[room] = {}
+        codeRooms[room][name] = ws
+    } else if (codeRooms[room] && name == 'user') {
+        codeRooms[room][name] = ws
     } else {
         ws.close()
     }
@@ -200,7 +200,7 @@ function LoginCode(ws, req) {
         let data = JSON.parse(Resp_data)
         if (name == 'user') {
             if (data.operation == "connect") {
-                rooms[room]['device'].send(JSON.stringify(data))
+                codeRooms[room]['device'].send(JSON.stringify(data))
             } else if (data.operation == "login") {
                 let username = data.username
                 const sql = 'select * from user where username=?'
@@ -224,26 +224,26 @@ function LoginCode(ws, req) {
                                 phone: results[0].phone,
                             }
                         }
-                        rooms[room]['device'].send(JSON.stringify(data))
+                        codeRooms[room]['device'].send(JSON.stringify(data))
                     } else {
                         ws.send(JSON.stringify({ operation: "error", error: "登录失败" }))
                     }
                 })
             }
         } else {
-            rooms[room]['user'].send(Resp_data)
+            codeRooms[room]['user'].send(Resp_data)
         }
     });
     ws.on('close', function () {
         if (name == 'device') {
-            delete rooms[room][name]
-            for (const key in rooms[room]) {
-                rooms[room][key].close()
+            delete codeRooms[room][name]
+            for (const key in codeRooms[room]) {
+                codeRooms[room][key].close()
             }
-            delete rooms[room]
+            delete codeRooms[room]
         } else {
-            if (rooms[room]) {
-                delete rooms[room][name]
+            if (codeRooms[room]) {
+                delete codeRooms[room][name]
             }
         }
     })
@@ -275,15 +275,16 @@ function initUserNotification(ws, req) {
     let url = req.url.split("?")[1];
     let params = new URLSearchParams(url)
     let username = params.get("username")
-    //音视频状态,用户
-    var status = false
     //如果用户已经登录则强制退出当前用户
-    if (LoginRooms[username]) {
-        LoginRooms[username].send(JSON.stringify({ name: "logout" }))
-        LoginRooms[username].close()
+    // if (LoginRooms[username]) {
+    //     LoginRooms[username].send(JSON.stringify({ name: "logout" }))
+    //     LoginRooms[username].close()
+    // }
+    LoginRooms[username] = {
+        ws: ws,
+        status: false,
     }
-    LoginRooms[username] = ws
-    ws.on('message', function (Resp_data) {
+    ws.on('message', async (Resp_data) => {
         let data = JSON.parse(Resp_data)
         //接收者
         let receiver_username = data.receiver_username
@@ -292,30 +293,59 @@ function initUserNotification(ws, req) {
                 ws.send(JSON.stringify({ name: "reject", message: "对方当前不在线!!!" }))
                 return
             }
+            if (LoginRooms[receiver_username].status) {
+                ws.send(JSON.stringify({ name: "reject", message: "对方正在通话中!!!" }))
+                return
+            }
             //当用户已经在音视频通话了则需要告知发送方
-            if (status) {
+            if (LoginRooms[username].status) {
                 ws.send(JSON.stringify({ name: "reject", message: "你正在通话中,请勿发送其他通话请求...." }))
                 return
-            } else {
-                status = true
             }
+            LoginRooms[username].status = true
             //对方在线
             if (LoginRooms[receiver_username]) {
-                LoginRooms[receiver_username].send(Resp_data)
+                LoginRooms[receiver_username].ws.send(Resp_data)
                 data.method = data.name
                 data.name = 'peer'
                 ws.send(JSON.stringify(data))
                 return
             }
+        } else if (data.name == 'group_audio' || data.name == 'group_video') {
+            if (LoginRooms[username].status || (group_rooms[data.room] && Object.keys(group_rooms[data.room]).length != 0)) {
+                ws.send(JSON.stringify({ name: "reject", message: "无法创建群音视频...." }))
+                return
+            }
+            /**
+             * 群视频逻辑处理
+             * 
+            */
+            group_rooms[data.room] = {}
+            group_rooms[data.room][username] = ""
+            LoginRooms[username].status = true
+            for (const user of data.userList) {
+                if (user == data.sender_name) {
+                    continue
+                }
+                //对方在线且并未通话
+                if (LoginRooms[user] && !LoginRooms[user].status) {
+                    group_rooms[data.room][user] = ""
+                    LoginRooms[user].ws.send(Resp_data)
+                }
+            }
+            data.method = data.name
+            data.name = 'group_peer'
+            ws.send(JSON.stringify(data))
+            return
         }
         //拒绝通话
         if (data.name == 'reject') {
-            status = false
+            LoginRooms[username].status = false
             return
         }
         //对方在线
         if (LoginRooms[receiver_username]) {
-            LoginRooms[receiver_username].send(Resp_data)
+            LoginRooms[receiver_username].ws.send(Resp_data)
         }
     });
     ws.on('close', function () {

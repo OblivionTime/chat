@@ -89,8 +89,15 @@ export default {
             this.$emit('chooseRoom', item);
         },
         //修改currentRoom
-        updatecurrentRoom(id) {
-            this.currentRoom = id
+        updatecurrentRoom(user_id,group_id) {
+            if(!group_id){
+                this.cureentGroup = false
+                this.currentRoom = user_id
+            }else{
+                this.cureentGroup = true
+                this.currentRoom = group_id
+
+            }
         },
         //解析最后一条消息
         ParseMessage(item) {

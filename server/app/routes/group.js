@@ -29,9 +29,25 @@ function authenticateToken(req, res, next) {
     });
 }
 module.exports = function () {
+    //群聊列表
     router.get('/list', authenticateToken, group.List)
+    //获取群聊中所有群员
+    router.get('/members_list', authenticateToken, group.MembersList)
+    //创建群聊
     router.post('/create_group', authenticateToken, upload.single('avatar'), group.CreateGroupChat)
+    //搜索群聊
     router.get('/search', authenticateToken, group.SearchGroupChat)
+    //加入群聊
     router.get('/join', authenticateToken, group.JoinGroupChat)
+    //群聊信息
+    router.get('/info', authenticateToken, group.GroupInfo)
+    //重命名
+    router.post('/rename', authenticateToken, group.RenameGroup)
+    //邀请群聊
+    router.post('/invitation', authenticateToken, group.invitedUsersToGroup)
+    //退出群聊
+    router.post('/exitGroupChat', authenticateToken, group.DeleteUserFromGroup)
+    //获取音视频房间的所有用户
+    router.get('/getRTCUser', authenticateToken, group.GetRTCUser)
     return router
 }

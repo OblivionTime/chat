@@ -24,6 +24,11 @@ function initGlobal() {
     const { NotificationUser } = require("./utils/notification.js")
     global.NotificationUser = NotificationUser
     /**
+     * 音视频房间
+     */
+    global.rooms={}
+    global.group_rooms={}
+    /**
      * 初始化new bing中的可执行文件
      */
     ExitDir()

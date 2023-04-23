@@ -21,10 +21,11 @@
         <div class="audio-accept" v-if="flag" @mouseover="mouseOverHandler" @mouseleave="mouseLeaveHandler">
             <div style="width: 100vw;height: 100vh;">
                 <video src="" ref="video" autoplay style="opacity: 1;width: 100vw;height: 100vh;object-fit: cover;"
-                    @timeupdate="updateTime"></video>
+                    @timeupdate="updateTime"  poster="@/assets/black.png"></video>
             </div>
             <div class="self-video">
-                <video src="" ref="selfvideo" autoplay style="opacity: 1;height: 40vh;object-fit: cover;"></video>
+                <video src="" id="selfvideo" autoplay style="opacity: 1;height: 40vh;object-fit: cover;"
+                    poster="@/assets/black.png"></video>
             </div>
             <div class="show-reject" :style="showTimeSty">
                 <div style="color: white;">{{ broadcastTime }}</div>
@@ -116,7 +117,6 @@ export default {
                     try {
                         //最新的标准API
                         stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-
                     } catch (error) {
                         try {
                             //最新的标准API
@@ -132,9 +132,7 @@ export default {
                         }
                     }
                     this.localStream = stream
-                    //初始化PC源
                     this.initPC()
-                    //添加音频流
                     this.pc.addStream(this.localStream)
                     //发起邀请
                     this.socket.send(JSON.stringify({ "name": "createRoom", mode: "video_invitation" }))
@@ -143,11 +141,33 @@ export default {
             this.socket.onmessage = (message) => {
                 let data = JSON.parse(message.data)
                 switch (data.name) {
-                    case "offer":
+                    case "new_peer":
                         if (this.timer) {
                             clearTimeout(this.timer)
                             this.timer = null
                         }
+                        this.flag = true
+                        this.$nextTick(() => {
+                            let selfvideo = document.getElementById("selfvideo")
+                            selfvideo.srcObject = this.localStream
+                            this.pc.createOffer((session_desc) => {
+                                this.pc.setLocalDescription(session_desc);
+                                this.socket.send(
+                                    JSON.stringify({
+                                        name: "offer",
+                                        data: {
+                                            sdp: session_desc,
+                                        },
+                                        receiver: this.username,
+                                    })
+                                );
+                            }, (err) => {
+                                console.log(err);
+                            });
+                        });
+
+                        break
+                    case "offer":
                         try {
                             this.flag = true
                             //当收到对方接收请求后,设置音频源,并发送answer给对方
@@ -223,15 +243,23 @@ export default {
                 }
             }
             this.localStream = stream
+            this.initPC()
+            this.pc.addStream(this.localStream)
             this.flag = true
             this.$nextTick(() => {
-                this.initPC()
-                this.pc.addStream(this.localStream)
-                this.pc.createOffer(this.pcCreateCbGen("peer"), (err) => {
-                    console.log(err);
-                });
-                // this.$refs.selfvideo.srcObject = this.localStream;
-            });
+                let selfvideo = document.getElementById("selfvideo")
+                selfvideo.srcObject = stream
+                this.socket.send(
+                    JSON.stringify({
+                        name: "new_peer",
+                        data: {
+                            username: this.username,
+                        },
+                        receiver: this.username,
+                    })
+                );
+            })
+
 
         },
         //拒绝或挂断
@@ -248,20 +276,6 @@ export default {
                     win.close()
                 }, 1000);
             }
-        },
-        pcCreateCbGen(sendEventName) {
-            return (session_desc) => {
-                this.pc.setLocalDescription(session_desc);
-                this.socket.send(
-                    JSON.stringify({
-                        name: sendEventName,
-                        data: {
-                            sdp: session_desc,
-                        },
-                        receiver: this.username,
-                    })
-                );
-            };
         },
         //初始化PC
         initPC() {
@@ -287,9 +301,9 @@ export default {
                 this.$nextTick(() => {
                     try {
                         this.$refs.video.srcObject = stream;
-                        if (this.localStream) {
-                            this.$refs.selfvideo.srcObject = this.localStream;
-                        }
+                        // if (this.localStream) {
+                        //     this.$refs.selfvideo.srcObject = this.localStream;
+                        // }
                     } catch (error) {
                         console.log(error);
                     }
@@ -418,7 +432,7 @@ export default {
 
         .self-video {
             position: absolute;
-            bottom: 0;
+            top: 0;
             right: 0;
         }
 

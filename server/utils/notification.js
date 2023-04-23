@@ -1,3 +1,11 @@
+/*
+ * @Description: 
+ * @Version: 1.0
+ * @Autor: solid
+ * @Date: 2023-04-14 17:16:36
+ * @LastEditors: solid
+ * @LastEditTime: 2023-04-23 17:06:29
+ */
 
 //通知对方
 async function NotificationUser(data) {
@@ -9,7 +17,7 @@ async function NotificationUser(data) {
         receiver_username = results[0].username
     }
     if (LoginRooms[receiver_username]) {
-        LoginRooms[receiver_username].send(JSON.stringify(data))
+        LoginRooms[receiver_username].ws.send(JSON.stringify(data))
     }
 }
 module.exports = {
