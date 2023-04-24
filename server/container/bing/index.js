@@ -13,6 +13,9 @@ let bing_rooms = {}
  */
 //生成密钥对
 async function generateConversation(req, res) {
+    if (os.platform() !== 'win32') {
+        return RespError(res, RespServerErr)
+    }
     //获取当前登录的用户名
     let username = req.user.username
     const { proxy } = req.query
