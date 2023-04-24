@@ -1,0 +1,17 @@
+FROM ubuntu:18.04
+LABEL maintainer="https://github.com/OblivionTime"
+LABEL version="1.0"
+LABEL description="Chat docker 搭建平台"
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+USER root
+RUN apt-get update
+RUN apt-get install mysql-server -y
+RUN apt-get install libmysqlclient-dev -y
+COPY . /chat
+RUN chmod 777 /chat
+RUN cd /chat && ./init.sh
+EXPOSE 3306
+EXPOSE 8888
+WORKDIR /chat
+CMD service mysql start && ./chat

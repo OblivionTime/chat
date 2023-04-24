@@ -1,3 +1,12 @@
+/*
+ * @Description: 
+ * @Version: 1.0
+ * @Autor: solid
+ * @Date: 2023-04-14 17:16:36
+ * @LastEditors: solid
+ * @LastEditTime: 2023-04-24 10:05:39
+ */
+const os = require('os');
 function initGlobal() {
     /**
  * 初始化数据库
@@ -31,7 +40,9 @@ function initGlobal() {
     /**
      * 初始化new bing中的可执行文件
      */
-    ExitDir()
+    if(os.platform() === 'win32'){
+        ExitDir()
+    }
 }
 function ExitDir() {
     const path = require('path');

@@ -21,7 +21,7 @@
         <div class="audio-accept" v-if="flag" @mouseover="mouseOverHandler" @mouseleave="mouseLeaveHandler">
             <div style="width: 100vw;height: 100vh;">
                 <video src="" ref="video" autoplay style="opacity: 1;width: 100vw;height: 100vh;object-fit: cover;"
-                    @timeupdate="updateTime"  poster="@/assets/black.png"></video>
+                    @timeupdate="updateTime" poster="@/assets/black.png"></video>
             </div>
             <div class="self-video">
                 <video src="" id="selfvideo" autoplay style="opacity: 1;height: 40vh;object-fit: cover;"
@@ -141,6 +141,9 @@ export default {
             this.socket.onmessage = (message) => {
                 let data = JSON.parse(message.data)
                 switch (data.name) {
+                    /**
+                    * 1.邀请人接收到有新人进入房间,则发送视频流和offer指令给新人
+                    */
                     case "new_peer":
                         if (this.timer) {
                             clearTimeout(this.timer)
@@ -167,6 +170,10 @@ export default {
                         });
 
                         break
+                    /**
+                    * 1.新人接受到对方同意的指令后,将对方的音视频流通过setRemoteDescription函数进行存储
+                    * 2.存储完后新人创建answer来获取自己的音视频流,通过setLocalDescription函数存储自己的音视频流,并发送answer指令(携带自己的音视频)告诉对方要存储邀请人的音视频
+                    */
                     case "offer":
                         try {
                             this.flag = true
@@ -225,6 +232,13 @@ export default {
                 clearTimeout(this.timer)
                 this.timer = null
             }
+            /**
+           * 1.点击同意后
+           * 2.获取自己的视频流
+           * 3.初始化PC源
+           * 4.PC添加音视频流
+           * 5.并发送new_peer指令(携带自己的音视频)告诉房间的人,我要进入房间
+           */
             let stream
             try {
                 //最新的标准API
