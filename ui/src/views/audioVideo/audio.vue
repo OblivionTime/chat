@@ -136,6 +136,9 @@ export default {
                 let data = JSON.parse(message.data)
                
                 switch (data.name) {
+                    /**
+                     * 1.邀请人接收到有新人进入房间,则发送视频流和offer指令给新人
+                     */
                     case "new_peer":
                         if (this.timer) {
                             clearTimeout(this.timer)
@@ -159,8 +162,8 @@ export default {
 
                         break
                     /**
-                     * 1.邀请人接受到对方同意的指令后,将对方的音视频流通过setRemoteDescription函数进行存储
-                     * 2.存储完后邀请人创建answer来获取自己的音视频流,通过setLocalDescription函数存储自己的音视频流,并发送answer指令(携带自己的音视频)告诉对方要存储邀请人的音视频
+                     * 1.新人接受到对方同意的指令后,将对方的音视频流通过setRemoteDescription函数进行存储
+                     * 2.存储完后新人创建answer来获取自己的音视频流,通过setLocalDescription函数存储自己的音视频流,并发送answer指令(携带自己的音视频)告诉对方要存储邀请人的音视频
                      */
                     case "offer":
 
@@ -221,8 +224,7 @@ export default {
              * 2.获取自己的视频流
              * 3.初始化PC源
              * 4.PC添加音视频流
-             * 5.创建offer,获取自己的音视频流,并通过setLocalDescription函数存储自己的音视频流
-             * 6.并发送peer指令(携带自己的音视频)告诉邀请人要存储自己的音视频
+             * 5.并发送new_peer指令(携带自己的音视频)告诉房间的人,我要进入房间
              */
             try {
                 if (this.timer) {
