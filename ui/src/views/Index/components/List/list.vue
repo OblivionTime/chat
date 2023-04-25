@@ -1,7 +1,8 @@
 <template>
     <div class="list" @click="showAdd = false">
         <div class="search">
-            <el-input placeholder="搜索" prefix-icon="el-icon-search" v-model="search" class="search-input" />
+            <el-input placeholder="搜索" prefix-icon="el-icon-search" v-model="search" class="search-input"
+                oninput="value=value.replace(/[^0-9a-zA-Z\u4e00-\u9fa5]/g,'')" />
             <div class="search-add">
                 <el-button type="text" icon="el-icon-plus" style="padding:0;color: #000;"
                     @click.stop="showAdd = true"></el-button>
@@ -17,7 +18,8 @@
         </div>
         <div class="contact-list" v-else>
             <Contact v-if="current == 'contact'" ref="contact" @showFriendInfo="showFriendInfo"
-                @openCreateDialog="openCreateDialog" @showGroupInfo="showGroupInfo" @ShowinvitationFriend="ShowinvitationFriend"></Contact>
+                @openCreateDialog="openCreateDialog" @showGroupInfo="showGroupInfo"
+                @ShowinvitationFriend="ShowinvitationFriend"></Contact>
 
         </div>
         <el-dialog :visible.sync="showAddDialog" width="600px" custom-class="add-dialog" top="25vh">
@@ -26,7 +28,8 @@
                     <div>
                         <div style="display: flex;">
                             <el-input placeholder="请输入对方的用户名" prefix-icon="el-icon-search" v-model="username"
-                                style="height: 32px;" @keyup.enter.native="searchData('friend')">
+                                oninput="value=value.replace(/[^0-9a-zA-Z\u4e00-\u9fa5]/g,'')" style="height: 32px;"
+                                @keyup.enter.native="searchData('friend')">
                             </el-input>
                             <button class="search-btn" @click="searchData('friend')">查找</button>
                         </div>
@@ -37,7 +40,7 @@
                                 <div class="list-item-desc">
                                     <p class="list-item-username">{{ item.name }}({{ item.username }})</p>
                                     <button v-if="!item.status" @click="addFriend(item.username, item.id)">加好友</button>
-                                    <span  v-if="item.status" style="font-size: 12px;color: red;">已经是好友</span>
+                                    <span v-if="item.status" style="font-size: 12px;color: red;">已经是好友</span>
                                 </div>
                             </div>
                         </div>
@@ -47,6 +50,7 @@
                 <el-tab-pane label="找群" name="find_group">
                     <div style="display: flex;">
                         <el-input placeholder="请输入群名称" prefix-icon="el-icon-search" v-model="name" style="height: 32px;"
+                            oninput="value=value.replace(/[^0-9a-zA-Z\u4e00-\u9fa5]/g,'')"
                             @keyup.enter.native="searchData('group')">
                         </el-input>
                         <button class="search-btn " @click="searchData('group')">查找</button>
@@ -58,7 +62,7 @@
                             <div class="list-item-desc">
                                 <p class="list-item-username">{{ item.name }} ({{ item.number }}人)</p>
                                 <button v-if="!item.status" @click="joinGroup(item.name, item.group_id)">加入群聊</button>
-                                <span  v-if="item.status" style="font-size: 12px;color: red;">已加入群聊</span>
+                                <span v-if="item.status" style="font-size: 12px;color: red;">已加入群聊</span>
 
                             </div>
                         </div>
@@ -123,11 +127,11 @@
                     </el-form-item>
                     <el-form-item label="群名:" label-width="140px" style="font-size: 18px" prop="ployId">
                         <el-input v-model="formData.name" auto-complete="off" style="width: 400px" maxlength="10"
-                            show-word-limit />
+                            oninput="value=value.replace(/[^0-9a-zA-Z\u4e00-\u9fa5]/g,'')" show-word-limit />
                     </el-form-item>
                     <el-form-item label="公告:" label-width="140px" style="font-size: 18px" prop="ploySubId">
-                        <el-input v-model="formData.announcement" auto-complete="off" style="width: 400px" type="textarea"
-                            maxlength="30" show-word-limit />
+                        <el-input v-model="formData.announcement" auto-complete="off" style="width: 400px" maxlength="30"
+                            show-word-limit oninput="value=value.trim()" />
                     </el-form-item>
                 </el-form>
                 <div style="margin-top: 10px;text-align: right;">
@@ -248,6 +252,14 @@ export default {
         };
     },
     methods: {
+        /**
+         * 刷新联系人
+         */
+        refreshList() {
+            if (this.current == 'contact') {
+                this.$refs.contact.loadData()
+            }
+        },
         //打开添加好友/群聊窗口
         openAddDialog() {
             this.showAddDialog = true
@@ -346,8 +358,8 @@ export default {
                         })
                 })
         },
-        updatecurrentRoom(user_id,group_id) {
-            this.$refs.chat.updatecurrentRoom(user_id,group_id)
+        updatecurrentRoom(user_id, group_id) {
+            this.$refs.chat.updatecurrentRoom(user_id, group_id)
         },
         /**
          * 添加群聊相关 
@@ -399,8 +411,10 @@ export default {
                 return this.$message.warning("请选择成员后在进行下一步!!!")
             }
             this.create_ani = "opacity: 0;"
+            this.create_ani2 = "opacity: 1;"
             setTimeout(() => {
                 this.create_ani = "display: none"
+                this.create_ani = ""
                 this.step = true
             }, 900);
         },
@@ -507,6 +521,8 @@ export default {
                         this.$message.success("邀请成功")
                         this.showInvitationDialog = false
                         this.$refs.contact.loadGroupData()
+                        this.refreshList()
+                        this.$emit("update_group_info")
                     } else {
                         this.$message.error(res.message)
                     }

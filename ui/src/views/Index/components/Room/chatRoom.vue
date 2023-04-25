@@ -1,3 +1,11 @@
+<!--
+ * @Description: 
+ * @Version: 1.0
+ * @Autor: solid
+ * @Date: 2023-04-16 21:19:28
+ * @LastEditors: solid
+ * @LastEditTime: 2023-04-25 09:57:20
+-->
 <template>
     <div class="chat-container" @click="showEmoji = false" :style="containerAni">
         <div class="header">
@@ -68,7 +76,8 @@
                     <input type="file" id="send-message-header-file" accept="*" style="display: none" @change="SendFile">
                 </div>
                 <div class="send-message-content">
-                    <textarea class="send-message-content-textarea" v-model="content" @keyup="onKeyUp" />
+                    <textarea class="send-message-content-textarea" v-model="content" @keyup="onKeyUp"
+                        oninput="value=value.replace(/^\s+/, '')" />
                 </div>
                 <div class="send-message-btn">
                     <el-dropdown split-button type="primary" trigger="click" style="height: 30px;" @click="sendMessage">
@@ -89,7 +98,7 @@
                         </el-dropdown-menu>
                     </el-dropdown>
                 </div>
-                <div class="emoji-list" v-if="showEmoji">
+                <div class="emoji-list" v-if="showEmoji" @click.stop="">
                     <div class="emoji-list-items">
                         <div v-for="item, index in EmojiList" :key="index" @click.stop="addEmoji(item)">{{ item }}
                         </div>

@@ -67,9 +67,6 @@ export default {
     },
     created() {
         this.loadData()
-        document.addEventListener('click', () => {
-            this.editBtn = false
-        })
     },
     watch: {
         options(newOptions, oldOptions) {
@@ -110,6 +107,7 @@ export default {
                         this.$message.success("修改成功")
                         this.options.group_id = this.formData.new_group_id
                         this.loadData()
+                        this.$emit("update_friend")
                     } else {
                         this.$message.error(res.message)
                     }

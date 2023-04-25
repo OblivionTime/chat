@@ -43,7 +43,7 @@
             <div class="send-message">
 
                 <div class="send-message-content">
-                    <textarea class="send-message-content-textarea" v-model="content" @keyup="onKeyUp" />
+                    <textarea class="send-message-content-textarea" v-model="content" @keyup="onKeyUp" oninput="value=value.replace(/^\s+/, '')" />
                 </div>
                 <div class="send-message-btn">
                     <el-dropdown split-button type="primary" trigger="click" :class="disabeldSend ? 'disabeld-send' : ''"

@@ -4,7 +4,7 @@
  * @Autor: solid
  * @Date: 2022-08-12 14:21:50
  * @LastEditors: solid
- * @LastEditTime: 2023-04-23 17:18:35
+ * @LastEditTime: 2023-04-25 10:54:31
  */
 'use strict'
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
@@ -25,9 +25,11 @@ async function createWindow() {
     title: "翎",
     icon: "./assets/logo.png",
     width: 400,
-    useContentSize: true,
-    autoHideMenuBar:true,
     height: 320,
+    minWidth: 400,
+    minHeight: 320,
+    useContentSize: true,
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -50,7 +52,8 @@ ipcMain.on('resize-window', (event, { width, height }) => {
   const window = BrowserWindow.getFocusedWindow();
 
   if (window) {
-    window.setSize(width, height);
+    window.setSize(width, height, true);
+    window.setMinimumSize(width, height);
     window.center();
   }
 });
@@ -69,8 +72,10 @@ ipcMain.on('open-window', (event, options) => {
     title: title,
     width: 600,
     useContentSize: true,
-    autoHideMenuBar:true,
+    autoHideMenuBar: true,
     height: 400,
+    minWidth: 600,
+    minHeight: 400,
     icon: "./assets/logo.png",
     webPreferences: {
       nodeIntegration: true,
