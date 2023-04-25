@@ -4,7 +4,7 @@
         <div class="form">
             <div class="form-user">
                 <img src="../../assets/login/user.png" alt="" width="20px" class="form-icon">
-                <input type="text" placeholder="用户名" v-model="formData.username">
+                <input type="text" placeholder="用户名" v-model="formData.username" oninput="value=value.replace(/[^0-9a-zA-Z]/g,'')">
             </div>
             <div class="form-user">
                 <img src="../../assets/login/phone.png" alt="" width="20px" class="form-icon">
@@ -13,7 +13,7 @@
             </div>
             <div class="form-password">
                 <img src="../../assets/login/lock.png" alt="" width="20px" class="form-icon">
-                <input type="password" placeholder="新密码" v-model="formData.password"  @keydown.enter="submitForm">
+                <input type="password" placeholder="新密码" v-model="formData.password"  @keydown.enter="submitForm" oninput="value=value.replace(/[^0-9a-zA-Z]/g,'')">
             </div>
 
             <button class="form-button" @click="submitForm">

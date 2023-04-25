@@ -3,15 +3,16 @@
         <SideBar @changeStatus="changeStatus" ref="SideBar" @getAIoptions="getAIoptions"></SideBar>
         <List :current="current" ref="List" @ListChangeStatus="ListChangeStatus" @chooseRoom="chooseRoom"
             @showFriendInfo="showFriendInfo" @showGroupInfo="showGroupInfo" @sendFriendMessage="sendFriendMessage"
-            @sendGroupMessage="sendGroupMessage" @ShowinvitationFriend="ShowinvitationFriend"></List>
+            @sendGroupMessage="sendGroupMessage" @ShowinvitationFriend="ShowinvitationFriend" @update_group_info="update_group_info"></List>
         <chatRoom :options="options" @updateList="updateList" @sendInvitation="sendInvitation" v-if="currentRoom == 'chat'">
         </chatRoom>
         <groupRoom :options="groupOptions" @updateList="updateList" @sendGroupInvitation="sendGroupInvitation"
             v-if="currentRoom == 'group'"></groupRoom>
         <AIRoom :options="AIoptions" v-if="currentRoom == 'ai'"></AIRoom>
-        <Info :options="friendoptions" v-if="currentRoom == 'info'" @sendFriendMessage="sendFriendMessage"></Info>
-        <Group :group_id="groupInfooptions" v-if="currentRoom == 'group_info'" @sendGroupMessage="sendGroupMessage"
-            @ShowinvitationFriend="ShowinvitationFriend"></Group>
+        <Info :options="friendoptions" v-if="currentRoom == 'info'" @sendFriendMessage="sendFriendMessage"
+            @update_friend=update_friend></Info>
+        <Group ref="group_info"  :group_id="groupInfooptions" v-if="currentRoom == 'group_info'" @sendGroupMessage="sendGroupMessage"
+            @ShowinvitationFriend="ShowinvitationFriend" ></Group>
     </div>
 </template>
 
@@ -248,6 +249,11 @@ export default {
                 this.$refs.List.updatecurrentRoom(item.user_id)
             });
         },
+        update_friend() {
+            if (this.current != 'chat') {
+                this.$refs.List.refreshList()
+            }
+        },
         /**
          * 群聊相关
          */
@@ -268,6 +274,12 @@ export default {
         //邀请好友
         ShowinvitationFriend(group_id) {
             this.$refs.List.ShowinvitationFriend(group_id)
+        },
+        //更新群聊信息
+        update_group_info(){
+            if( this.currentRoom =='group_info'){
+                this.$refs.group_info.loadData()
+            }
         },
         /**
          * bing相关方法

@@ -37,9 +37,9 @@
                         accept="image/jpeg,image/jpg,image/png" @change="changeImage">
                 </div>
                 <div class="info-name">
-                    <p><input type="text" class="info-input" v-model="userInfo.name"></p>
+                    <p><input type="text" class="info-input" v-model="userInfo.name"  oninput="value=value.replace(/[^0-9a-zA-Z\u4e00-\u9fa5]/g,'')" /></p>
                     <span style="font-size: 12px;color: rgba(0,0,0,0.5);"><input type="text" class="info-input"
-                            v-model="userInfo.signature" placeholder="暂无个性签名"></span>
+                            v-model="userInfo.signature" placeholder="暂无个性签名"  oninput="value=value.trim()"></span>
                 </div>
             </div>
             <hr>
@@ -175,9 +175,16 @@ export default {
         },
         toUpdateInfo() {
             let formData = new FormData();
+            if (!this.userInfo['name'].trim()) {
+                return this.$message.warning("昵称不能为空")
+            }
+            if (this.userInfo['phone'] && this.userInfo['phone'].length != 11) {
+                return this.$message.warning("手机号必须11位")
+            }
             formData.append("username", this.userInfo['username']);
+            formData.append("name", this.userInfo['name'].trim());
             formData.append("phone", this.userInfo['phone']);
-            formData.append("signature", this.userInfo['signature']);
+            formData.append("signature", this.userInfo['signature'].trim());
             if (this.avatar) {
                 formData.append("avatar", this.avatar);
             }
@@ -206,7 +213,7 @@ export default {
                 inputType: "password",
                 center: true
             }).then(({ value }) => {
-                if (!value) {
+                if (!value.trim()) {
                     return this.$message.warning('请填写新密码')
                 }
                 let data = {

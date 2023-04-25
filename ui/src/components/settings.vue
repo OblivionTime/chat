@@ -16,7 +16,7 @@
                         </div>
                         <div class="basic-configuration-nav">
                             <img src="../assets/login/network.png" alt="" width="20px" class="form-icon">
-                            <input type="text" placeholder="服务器地址" v-model="proxyaddress">
+                            <input type="text" placeholder="服务器地址" v-model="proxyaddress" >
                         </div>
                         <div style="text-align: center;margin-top: 20px;">
                             <el-button style="width: 45%;" @click="showSettingsDialog = false">取消</el-button>

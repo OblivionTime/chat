@@ -68,7 +68,7 @@
                     <input type="file" id="send-message-header-file" accept="*" style="display: none" @change="SendFile">
                 </div>
                 <div class="send-message-content">
-                    <textarea class="send-message-content-textarea" v-model="content" @keyup="onKeyUp" />
+                    <textarea class="send-message-content-textarea" v-model="content" @keyup="onKeyUp" oninput="value=value.replace(/^\s+/, '')"/>
                 </div>
                 <div class="send-message-btn">
                     <el-dropdown split-button type="primary" trigger="click" style="height: 30px;" @click="sendMessage">
@@ -89,7 +89,7 @@
                         </el-dropdown-menu>
                     </el-dropdown>
                 </div>
-                <div class="emoji-list" v-if="showEmoji">
+                <div class="emoji-list" v-if="showEmoji" @click.stop="">
                     <div class="emoji-list-items">
                         <div v-for="item, index in EmojiList" :key="index" @click.stop="addEmoji(item)">{{ item }}
                         </div>
