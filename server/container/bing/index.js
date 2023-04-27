@@ -1,5 +1,6 @@
 
 let { RespUserOrPassErr, RespParamErr, RespServerErr, RespUserExitErr, RespUpdateErr, RespUserNotExitErr } = require('../../model/error');
+const os = require('os');
 const { Query } = require('../../db/query');
 const { getConversation } = require('../../utils/newBing');
 const { v4: uuidv4 } = require('uuid');
