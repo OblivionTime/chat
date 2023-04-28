@@ -81,6 +81,7 @@ async function Register(req, res) {
     if (!(username && password)) {
         return RespError(res, RespParamErr)
     }
+    //3个字节的字节码转化成16进制字符串，生成一个6位的salt
     const salt = crypto.randomBytes(3).toString('hex')
     const sql = 'select username,password from user where username=?'
     //判断用户名是否已注册
