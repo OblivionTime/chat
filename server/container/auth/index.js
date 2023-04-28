@@ -11,8 +11,10 @@ const jwt = require('jsonwebtoken');
 const secretKey = 'xWbiNA3FqnK77MnVCj5CAcfA-VlXj7xoQLd1QaAme6l_t0Yp1TdHbSw';
 let codeRooms = {}
 let { RespUserOrPassErr, RespParamErr, RespServerErr, RespUserExitErr, RespUpdateErr, RespUserNotExitErr } = require('../../model/error');
-const { RespData, RespSuccess } = require('../../model/resp');
+const { RespData, RespSuccess ,RespError} = require('../../model/resp');
 const { Query } = require('../../db/query');
+const crypto = require('crypto'); 
+
 /**
  * 登录基本逻辑
  * 1.获取到前端传来的username和password
@@ -24,8 +26,10 @@ async function Login(req, res) {
     if (!(username && password)) {
         return RespError(res, RespParamErr)
     }
-    const sql = 'select * from user where username=? and password=?'
-    let { err, results } = await Query(sql, [username, password])
+    //const salt = crypto.randomBytes(3).toString('hex')
+    
+    const sql = 'select * from user where username=?'
+    let { err, results } = await Query(sql, [username])
     // 查询数据失败
     if (err) return RespError(res, RespServerErr)
     // 查询数据成功
@@ -35,8 +39,17 @@ async function Login(req, res) {
             id: results[0].id,
             avatar: results[0].avatar,
             username: results[0].username,
+            password: results[0].password,
             name: results[0].name,
             phone: results[0].phone,
+            salt: results[0].salt
+        }
+        //加盐
+        let M = payload.salt.slice(0, 3) + password + payload.salt.slice(3);
+        // 将M进行MD5哈希，得到哈希值
+        let hash = crypto.createHash('md5').update(M).digest('hex');
+        if (hash != payload.password) {
+            return RespError(res, RespUserOrPassErr)
         }
         const token = jwt.sign(payload, secretKey);
         let data = {
@@ -68,6 +81,8 @@ async function Register(req, res) {
     if (!(username && password)) {
         return RespError(res, RespParamErr)
     }
+    //3个字节的字节码转化成16进制字符串，生成一个6位的salt
+    const salt = crypto.randomBytes(3).toString('hex')
     const sql = 'select username,password from user where username=?'
     //判断用户名是否已注册
     let { err, results } = await Query(sql, [username])
@@ -78,13 +93,18 @@ async function Register(req, res) {
     if (results.length != 0) {
         return RespError(res, RespUserExitErr)
     }
+    //加盐
+    let M = salt.slice(0, 3) + password + salt.slice(3);
+    // 将M进行MD5哈希，得到哈希值
+    let hash = crypto.createHash('md5').update(M).digest('hex');
     let user = {
         avatar: "",
         username: username,
-        password: password,
+        password: hash,
         name: username,
         phone: "",
         signature: "",
+        salt: salt
     }
     const sqlStr = 'insert into user set ?'
     let res2 = await Query(sqlStr, user)
@@ -160,7 +180,7 @@ async function ForgetPassword(req, res) {
     if (!(username && phone && password)) {
         return RespError(res, RespParamErr)
     }
-    const sql = 'select username,phone from user where username=? and phone=?'
+    const sql = 'select username,phone,salt from user where username=? and phone=?'
     //判断用户手机号和用户名是否存在
     let { err, results } = await Query(sql, [username, phone])
     // 查询数据失败
@@ -171,8 +191,12 @@ async function ForgetPassword(req, res) {
     if (results.length == 0) {
         return RespError(res, RespUserNotExitErr)
     }
+    const salt = results[0].salt
+    const M = salt.slice(0, 3) + password + salt.slice(3);
+    // 将M进行MD5哈希，得到哈希值
+    const hash = crypto.createHash('md5').update(M).digest('hex');
     const sqlStr = 'update user set password=? where username=?'
-    db.query(sqlStr, [password, username], (err, results) => {
+    db.query(sqlStr, [hash, username], (err, results) => {
         // 执行 SQL 语句失败了
         if (err) return RespError(res, RespServerErr)
         if (results.affectedRows === 1) {
