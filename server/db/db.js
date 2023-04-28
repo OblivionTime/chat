@@ -12,6 +12,7 @@ let database = 'chat'
 /**
  * 如果配置文件存在,则读取配置文件,不存在则默认
  */
+
 if (fs.existsSync("config.json")) {
     var res = JSON.parse(fs.readFileSync(`config.json`))
     host = res.host
@@ -39,11 +40,11 @@ function initUserTable() {
             avatar VARCHAR ( 255 ) NULL,
             phone VARCHAR ( 50 ) NULL,
             name VARCHAR ( 255 ) NULL,
+            salt varchar(20) NOT NULL,
             signature LONGTEXT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
-    ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
+    ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci; 
     `
     db.query(sql, (error, results, fields) => {
         if (error) return console.log(error);
