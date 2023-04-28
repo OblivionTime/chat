@@ -80,7 +80,7 @@ node-pty需要python依赖,这个只能根据错误去一个一个查找问题
 
 ```shell
 git clone https://github.com/OblivionTime/chat.git
-cd server
+cd chat/server
 yarn
 node index.js
 ```
@@ -89,7 +89,7 @@ node index.js
 
 ```shell
 git clone https://github.com/OblivionTime/chat.git
-cd ui
+cd chat/ui
 yarn
 #调试
 yarn serve
@@ -109,7 +109,7 @@ yarn build
 
 ```shell
 git clone https://github.com/OblivionTime/chat.git
-cd docker
+cd chat/docker
 docker build -t chat .
 #等待安装.....
 #安装成功后
