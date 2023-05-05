@@ -226,7 +226,9 @@ async function ChatConnect(ws, req) {
         await Query(sql, [room])
         for (const key in rooms[room]) {
             rooms[room][key].send(JSON.stringify(message))
-            NotificationUser({ receiver_id: message.receiver_id, name: "list" })
+            if(type != 'group'){
+                NotificationUser({ receiver_id: message.receiver_id, name: "list" })
+            }
         }
     })
 }

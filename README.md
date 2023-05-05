@@ -9,7 +9,41 @@
 
 `翎`是基于`electron(vue2)`和`nodejs`实现的简单聊天软件,其中用`websocket`和`http`进行通讯传递,数据库使用了`mysql`数据库,该项目功能简单,界面简洁,适合正在练习`websocket`和`vue`的小白查看代码,代码量极少且逻辑清晰,每个功能都会添加相应的逻辑供大家观看学习(大佬勿喷)
 
+# 🧧 作者自己的配置环境
+## 数据库
+![在这里插入图片描述](https://img-blog.csdnimg.cn/26ff87942de645f889404a3493b53bb5.png)
+## nodejs
+`14.20.1`
+## npm
+![在这里插入图片描述](https://img-blog.csdnimg.cn/732b1f4872104f28955cfdab601bf0c8.png)
+
 # 🧨 部分用户遇到的问题
+## 双击chat.exe出现闪退
+这里大概率就是你的数据库配置有问题,你需要去修改`config.json`将里面的内容修改成你自己`mysql`的配置信息
+## 安装依赖出现问题
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d5b03d3391914fdb857dd475f164002e.png)
+
+### 问题分析
+
+其实就是网络连接出错了， electron包下载不下来， 可以换成淘宝镜像地址就可以解决。
+
+### 问题解决方案
+1. npm config set ELECTRON_MIRROR http://npm.taobao.org/mirrors/electron/
+2. yarn config set ELECTRON_MIRROR http://npm.taobao.org/mirrors/electron/
+3. yarn 
+## 启动项目出现问题
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/4ceeb0591e204a1fa779d11a3211a3fd.png)
+### 问题分析
+
+数据库配置出现错误
+
+
+### 问题解决方案
+检测当前目录下的`config.json`文件,看数据库配置是否与自己的本机的数据库配置一致
+
 
 ## 数据库无法连接
 
@@ -57,6 +91,8 @@ mysql -u root -p
 2. 输入以下命令
 
 ```shell
+use mysql;
+update user set Host="%" where User="root";
 ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '你的密码';
 flush privileges;
 exit;
@@ -80,7 +116,7 @@ node-pty需要python依赖,这个只能根据错误去一个一个查找问题
 
 ```shell
 git clone https://github.com/OblivionTime/chat.git
-cd server
+cd /chat/server
 yarn
 node index.js
 ```
@@ -89,7 +125,7 @@ node index.js
 
 ```shell
 git clone https://github.com/OblivionTime/chat.git
-cd ui
+cd /chat/ui
 yarn
 #调试
 yarn serve
@@ -109,7 +145,7 @@ yarn build
 
 ```shell
 git clone https://github.com/OblivionTime/chat.git
-cd docker
+cd /chat/docker
 docker build -t chat .
 #等待安装.....
 #安装成功后
@@ -329,7 +365,7 @@ Express-ws支持标准的WebSocket协议和Socket.IO协议，可以通过简单�
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/e803127e3d8645a3b468c44a825b4269.png)
 
 3. 被邀请人点击同意后,获取自己的视频流,初始化PC源,PC添加音视频流,创建offer,获取自己的音视频流,并通过setLocalDescription函数存储自己的音视频流,并发送new_peer指令(携带自己的音视频)告诉房间的人,我要进入房间
-![在这里插入图片描述](https://img-blog.csdnimg.cn/57f5283083254dcfb4ecba99f67c89d7.png)
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/57f5283083254dcfb4ecba99f67c89d7.png)
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/83b6b19c06484c93a060ab3448de255c.png)
 
@@ -340,7 +376,7 @@ Express-ws支持标准的WebSocket协议和Socket.IO协议，可以通过简单�
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/241e681ad22f4c7f8c62a3cf0026f25a.png)
 
 5. 新人接受到对方同意的指令后,将对方的音视频流通过setRemoteDescription函数进行存储,存储完后新人创建answer来获取自己的音视频流,通过setLocalDescription函数存储自己的音视频流,并发送answer指令(携带自己的音视频)告诉对方要存储邀请人的音视频
-![在这里插入图片描述](https://img-blog.csdnimg.cn/72bbb2e5f8f24336addc32e3450f834b.png)
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/72bbb2e5f8f24336addc32e3450f834b.png)
 
 6. 设置邀请方发来的音频源
 
