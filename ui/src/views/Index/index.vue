@@ -8,7 +8,7 @@
         </chatRoom>
         <groupRoom :options="groupOptions" @updateList="updateList" @sendGroupInvitation="sendGroupInvitation"
             v-if="currentRoom == 'group'"></groupRoom>
-        <AIRoom :options="AIoptions" v-if="currentRoom == 'ai'"></AIRoom>
+        <!-- <AIRoom :options="AIoptions" v-if="currentRoom == 'ai'"></AIRoom> -->
         <Info :options="friendoptions" v-if="currentRoom == 'info'" @sendFriendMessage="sendFriendMessage"
             @update_friend=update_friend></Info>
         <Group ref="group_info"  :group_id="groupInfooptions" v-if="currentRoom == 'group_info'" @sendGroupMessage="sendGroupMessage"
@@ -23,7 +23,7 @@
 import SideBar from './components/SideBar/sidebar.vue'
 import List from './components/List/list.vue'
 import chatRoom from './components/Room/chatRoom.vue'
-import AIRoom from './components/Room/AIRoom.vue'
+// import AIRoom from './components/Room/AIRoom.vue'
 import groupRoom from './components/Room/groupRoom.vue'
 import Info from './components/Room/Info.vue'
 import Group from './components/Room/group.vue'
@@ -37,7 +37,7 @@ export default {
         SideBar,
         List,
         chatRoom,
-        AIRoom,
+        // AIRoom,
         groupRoom,
         Info,
         Group

@@ -1,5 +1,5 @@
 // 1. 导入 mysql和fs 模块
-const mysql = require('mysql')
+const mysql = require('mysql2')
 const fs = require('fs')
 /**
  * 初始化参数

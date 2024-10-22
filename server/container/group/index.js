@@ -126,6 +126,7 @@ async function CreateGroupChat(req, res) {
 //查询群聊
 async function SearchGroupChat(req, res) {
     const { name } = req.query
+    console.log(name);
     let sql = 'select * from group_chat where name like ?'
     let { err, results } = await Query(sql, [`%${name}%`])
     // 查询数据失败

@@ -24,7 +24,7 @@
                         </div>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="New Bing">
+                <!-- <el-tab-pane label="New Bing">
                     <div class="bing-configuration">
                         <div class="bing-configuration-title">
                             生成聊天次数
@@ -45,7 +45,7 @@
                             <el-button type="primary" @click="openBing">打开网站</el-button>
                         </div>
                     </div>
-                </el-tab-pane>
+                </el-tab-pane> -->
             </el-tabs>
         </el-dialog>
     </div>

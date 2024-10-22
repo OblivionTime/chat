@@ -37,9 +37,10 @@
                         accept="image/jpeg,image/jpg,image/png" @change="changeImage">
                 </div>
                 <div class="info-name">
-                    <p><input type="text" class="info-input" v-model="userInfo.name"  oninput="value=value.replace(/[^0-9a-zA-Z\u4e00-\u9fa5]/g,'')" /></p>
+                    <p><input type="text" class="info-input" v-model="userInfo.name"
+                            oninput="value=value.replace(/[^0-9a-zA-Z\u4e00-\u9fa5]/g,'')" /></p>
                     <span style="font-size: 12px;color: rgba(0,0,0,0.5);"><input type="text" class="info-input"
-                            v-model="userInfo.signature" placeholder="暂无个性签名"  oninput="value=value.trim()"></span>
+                            v-model="userInfo.signature" placeholder="暂无个性签名" oninput="value=value.trim()"></span>
                 </div>
             </div>
             <hr>
@@ -73,6 +74,8 @@ import vueQr from "vue-qr";
 import { UserUpdateInfo, UserUpdatePassword } from '@/api/auth';
 import { mapActions } from "vuex";
 import Settings from '@/components/settings'
+const { ipcRenderer } = window.require('electron');
+
 export default {
     components: {
         vueQr,
@@ -150,7 +153,8 @@ export default {
                 this.$store.dispatch("Logout");
                 this.$message.success("注销成功,即将跳转到登录界面");
                 setTimeout(() => {
-                    this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+                    this.$router.replace(`/login?redirect=${this.$route.fullPath}`);
+
                 }, 1000);
             });
         },

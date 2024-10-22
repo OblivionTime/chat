@@ -27,8 +27,7 @@ import S_Login from './Login.vue';
 import S_Register from './Register.vue';
 import S_forgetPassword from './forgetPassword.vue';
 import S_settings from './settings.vue';
-const { ipcRenderer } = window.require('electron');
-ipcRenderer.send('resize-window', { width: 400, height: 320 });
+
 export default {
     name: "Login",
     components: {
@@ -42,6 +41,12 @@ export default {
             status: "login"
 
         }
+    },
+    created() {
+        win.setMinimumSize(400, 320);
+        win.setSize(400, 320, true);
+        win.center();
+
     },
     methods: {
         //缩小窗口

@@ -422,11 +422,30 @@ export default {
         }
     }
 }
+.contextmenu {
+  margin: 0;
+  background: #fff;
+  position: absolute;
+  list-style-type: none;
+  padding: 10px 0;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #333;
+  box-shadow: 2px 2px 3px 2px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
 
-.menu {
-    position: fixed;
-    z-index: 1004;
-    background-color: #fff;
-    border-radius: 5px;
+  .item {
+    padding: 0 15px;
+    height: 35px;
+    width: 100%;
+    line-height: 35px;
+    color: rgb(29, 33, 41);
+    cursor: pointer;
+  }
+
+  .item:hover {
+    background: rgb(229, 230, 235);
+  }
 }
 </style>
