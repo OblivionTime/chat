@@ -10,6 +10,7 @@ RUN apt-get install mysql-server -y
 RUN apt-get install libmysqlclient-dev -y
 COPY . /chat
 RUN chmod 777 /chat
+RUN chmod 777 /chat/*
 RUN cd /chat && ./init.sh
 EXPOSE 3306
 EXPOSE 8888
